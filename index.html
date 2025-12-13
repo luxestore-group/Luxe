@@ -150,8 +150,7 @@ footer { text-align: center; padding: 20px 0; background-color: #000; color: gol
 
 <footer>&copy; 2025 Luxe Gadget Showcase</footer>
 
-<!-- Modals (same as before, can keep) -->
-<!-- ... keep your existing modal code here ... -->
+<!-- Modals (keep your existing modal HTML) -->
 
 <!-- Paystack Script -->
 <script src="https://js.paystack.co/v1/inline.js"></script>
@@ -160,7 +159,7 @@ function payProduct(product, price) {
     let handler = PaystackPop.setup({
         key: 'pk_live_98575428080557d261e91cb92fe745f878fc4278',
         email: 'jbellingham771@gmail.com',
-        amount: price * 100, // in kobo
+        amount: price * 100,
         currency: "GHS",
         ref: '' + Math.floor((Math.random() * 1000000000) + 1),
         callback: function(response){
@@ -175,23 +174,19 @@ function payProduct(product, price) {
     handler.openIframe();
 }
 
-// Existing modal JS
+// Modal JS
 const productCards = document.querySelectorAll('.product-card');
 productCards.forEach(card => {
     const modalId = card.getAttribute('data-modal');
     const modal = document.getElementById(modalId);
-    card.querySelector('.overlay button').onclick = () => {
-        modal.style.display = 'flex';
-    };
+    card.querySelector('.overlay button').onclick = () => { modal.style.display = 'flex'; };
 });
 const closeButtons = document.querySelectorAll('.close');
-closeButtons.forEach(btn => {
-    btn.onclick = () => { btn.closest('.modal').style.display = 'none'; };
-});
+closeButtons.forEach(btn => { btn.onclick = () => { btn.closest('.modal').style.display = 'none'; }; });
 window.onclick = function(event) {
     if(event.target.classList.contains('modal')) { event.target.style.display = 'none'; }
 }
 </script>
 
 </body>
-    </html>
+</html>
