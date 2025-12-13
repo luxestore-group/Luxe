@@ -34,16 +34,9 @@ main { max-width: 1200px; margin: 30px auto; padding: 0 15px; }
 .product-card:hover img { transform: scale(1.05); }
 
 /* Overlay */
-.overlay {
-    position: absolute; top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
-    opacity: 0; transition: opacity 0.4s; border-radius: 20px;
-}
+.overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s; border-radius: 20px; }
 .product-card:hover .overlay { opacity: 1; }
-.overlay button {
-    padding: 12px 25px; background: linear-gradient(90deg, gold, red); color: #fff;
-    font-weight: bold; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 6px 15px rgba(0,0,0,0.5); transition: transform 0.3s;
-}
+.overlay button { padding: 12px 25px; background: linear-gradient(90deg, gold, red); color: #fff; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 6px 15px rgba(0,0,0,0.5); transition: transform 0.3s; }
 .overlay button:hover { transform: scale(1.1); }
 
 /* Product info */
@@ -51,28 +44,16 @@ main { max-width: 1200px; margin: 30px auto; padding: 0 15px; }
 .product-info h3 { font-size: 1.3em; margin-bottom: 10px; color: #000; }
 .product-info p { font-size: 1em; margin-bottom: 15px; color: #555; }
 .product-info span { font-weight: 700; color: gold; font-size: 1.2em; }
-.buy-btn {
-    display: inline-block; padding: 12px 25px; margin-top: 10px; border: none; border-radius: 12px;
-    background: linear-gradient(90deg, #000, #555); color: gold; font-weight: bold; font-size: 1em;
-    text-decoration: none; transition: all 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
+.buy-btn { display: inline-block; padding: 12px 25px; margin-top: 10px; border: none; border-radius: 12px; background: linear-gradient(90deg, #000, #555); color: gold; font-weight: bold; font-size: 1em; text-decoration: none; transition: all 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 .buy-btn:hover { background: linear-gradient(90deg, gold, red); color: #fff; box-shadow: 0 6px 15px rgba(0,0,0,0.5); transform: scale(1.05); }
 
 /* Footer */
 footer { text-align: center; padding: 20px 0; background-color: #000; color: gold; font-weight: bold; letter-spacing: 1px; margin-top: 50px; text-shadow: 1px 1px 2px #333; }
 
 /* Modal */
-.modal {
-    display: none; position: fixed; z-index: 1000; left:0; top:0; width:100%; height:100%;
-    overflow:auto; background-color: rgba(0,0,0,0.8); align-items:center; justify-content:center;
-}
-.modal-content {
-    background-color:#fff; padding:20px; border-radius:15px; max-width:500px; width:90%;
-    text-align:center; position:relative;
-}
-.close {
-    position:absolute; top:10px; right:15px; font-size:1.5em; cursor:pointer; color:#000;
-}
+.modal { display: none; position: fixed; z-index: 1000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color: rgba(0,0,0,0.8); align-items:center; justify-content:center; }
+.modal-content { background-color:#fff; padding:20px; border-radius:15px; max-width:500px; width:90%; text-align:center; position:relative; }
+.close { position:absolute; top:10px; right:15px; font-size:1.5em; cursor:pointer; color:#000; }
 .modal-content img { width:100%; height:auto; border-radius:10px; margin-bottom:15px; }
 .modal-content h3 { margin-bottom:10px; }
 .modal-content p { color:#555; margin-bottom:10px; font-size:1em; }
@@ -100,7 +81,7 @@ footer { text-align: center; padding: 20px 0; background-color: #000; color: gol
         <h3>SilverCrest Blender</h3>
         <p>High-performance 2.5L blender</p>
         <span>₵300</span><br><br>
-        <a href="#" class="buy-btn">Buy Now</a>
+        <button class="buy-btn" onclick="payProduct('SilverCrest Blender', 300)">Buy Now</button>
     </div>
 </div>
 
@@ -112,7 +93,7 @@ footer { text-align: center; padding: 20px 0; background-color: #000; color: gol
         <h3>Luxury Headphones</h3>
         <p>Wireless, noise-cancelling</p>
         <span>₵250</span><br><br>
-        <a href="#" class="buy-btn">Buy Now</a>
+        <button class="buy-btn" onclick="payProduct('Luxury Headphones', 250)">Buy Now</button>
     </div>
 </div>
 
@@ -124,7 +105,7 @@ footer { text-align: center; padding: 20px 0; background-color: #000; color: gol
         <h3>Smart Watch</h3>
         <p>Track health & notifications</p>
         <span>₵400</span><br><br>
-        <a href="#" class="buy-btn">Buy Now</a>
+        <button class="buy-btn" onclick="payProduct('Smart Watch', 400)">Buy Now</button>
     </div>
 </div>
 
@@ -136,7 +117,7 @@ footer { text-align: center; padding: 20px 0; background-color: #000; color: gol
         <h3>USB & Cables</h3>
         <p>High-speed charging accessories</p>
         <span>₵50</span><br><br>
-        <a href="#" class="buy-btn">Buy Now</a>
+        <button class="buy-btn" onclick="payProduct('USB & Cables', 50)">Buy Now</button>
     </div>
 </div>
 
@@ -148,7 +129,7 @@ footer { text-align: center; padding: 20px 0; background-color: #000; color: gol
         <h3>MTN Data Bundle</h3>
         <p>1GB - 5GB daily bundles</p>
         <span>₵20 - ₵100</span><br><br>
-        <a href="#" class="buy-btn">Buy Now</a>
+        <button class="buy-btn" onclick="payProduct('MTN Data Bundle', 50)">Buy Now</button>
     </div>
 </div>
 
@@ -160,7 +141,7 @@ footer { text-align: center; padding: 20px 0; background-color: #000; color: gol
         <h3>Power Bank</h3>
         <p>10,000mAh fast charging</p>
         <span>₵150</span><br><br>
-        <a href="#" class="buy-btn">Buy Now</a>
+        <button class="buy-btn" onclick="payProduct('Power Bank', 150)">Buy Now</button>
     </div>
 </div>
 
@@ -169,69 +150,32 @@ footer { text-align: center; padding: 20px 0; background-color: #000; color: gol
 
 <footer>&copy; 2025 Luxe Gadget Showcase</footer>
 
-<!-- Modals -->
-<div id="modal1" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <img src="images/blender.jpg" alt="Blender">
-        <h3>SilverCrest Blender</h3>
-        <p>High-performance 2.5L blender with multiple speed settings.</p>
-        <span>₵300</span>
-    </div>
-</div>
+<!-- Modals (same as before, can keep) -->
+<!-- ... keep your existing modal code here ... -->
 
-<div id="modal2" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <img src="images/headphones.jpg" alt="Headphones">
-        <h3>Luxury Headphones</h3>
-        <p>Wireless, noise-cancelling headphones for immersive sound.</p>
-        <span>₵250</span>
-    </div>
-</div>
-
-<div id="modal3" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <img src="images/smartwatch.jpg" alt="Smart Watch">
-        <h3>Smart Watch</h3>
-        <p>Track your health, notifications, and fitness goals easily.</p>
-        <span>₵400</span>
-    </div>
-</div>
-
-<div id="modal4" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <img src="images/accessories.jpg" alt="Accessories">
-        <h3>USB & Cables</h3>
-        <p>High-speed charging and data transfer accessories.</p>
-        <span>₵50</span>
-    </div>
-</div>
-
-<div id="modal5" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <img src="images/data-bundles.jpg" alt="Data Bundles">
-        <h3>MTN Data Bundle</h3>
-        <p>1GB - 5GB daily bundles for fast internet on the go.</p>
-        <span>₵20 - ₵100</span>
-    </div>
-</div>
-
-<div id="modal6" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <img src="images/powerbank.jpg" alt="Power Bank">
-        <h3>Power Bank</h3>
-        <p>10,000mAh fast charging power bank for your devices.</p>
-        <span>₵150</span>
-    </div>
-</div>
-
+<!-- Paystack Script -->
+<script src="https://js.paystack.co/v1/inline.js"></script>
 <script>
-// Open modal on button click
+function payProduct(product, price) {
+    let handler = PaystackPop.setup({
+        key: 'pk_live_98575428080557d261e91cb92fe745f878fc4278',
+        email: 'jbellingham771@gmail.com',
+        amount: price * 100, // in kobo
+        currency: "GHS",
+        ref: '' + Math.floor((Math.random() * 1000000000) + 1),
+        callback: function(response){
+            // Open WhatsApp with pre-filled confirmation
+            let whatsappLink = `https://wa.me/0548164533?text=Hi!%20I%20just%20paid%20₵${price}%20for%20the%20${encodeURIComponent(product)}.%20Please%20confirm%20delivery.`;
+            window.open(whatsappLink, "_blank");
+        },
+        onClose: function(){
+            alert('Payment cancelled');
+        }
+    });
+    handler.openIframe();
+}
+
+// Existing modal JS
 const productCards = document.querySelectorAll('.product-card');
 productCards.forEach(card => {
     const modalId = card.getAttribute('data-modal');
@@ -240,21 +184,14 @@ productCards.forEach(card => {
         modal.style.display = 'flex';
     };
 });
-
-// Close modal
 const closeButtons = document.querySelectorAll('.close');
 closeButtons.forEach(btn => {
-    btn.onclick = () => {
-        btn.closest('.modal').style.display = 'none';
-    };
+    btn.onclick = () => { btn.closest('.modal').style.display = 'none'; };
 });
-
-// Close modal on outside click
 window.onclick = function(event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.style.display = 'none';
-    }
+    if(event.target.classList.contains('modal')) { event.target.style.display = 'none'; }
 }
 </script>
+
 </body>
     </html>
