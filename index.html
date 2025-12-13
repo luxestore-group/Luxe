@@ -213,38 +213,68 @@ footer { text-align: center; padding: 20px 0; background-color: #000; color: gol
 
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script>
-function payProduct(product, price) {
-    let handler = PaystackPop.setup({
-        key: 'pk_live_98575428080557d261e91cb92fe745f878fc4278',
-        email: 'jbellingham771@gmail.com',
-        amount: price * 100,
-        currency: "GHS",
-        ref: '' + Math.floor((Math.random() * 1000000000) + 1),
-        callback: function(response){
-            let whatsappLink = `https://wa.me/0548164533?text=Hi!%20I%20just%20paid%20₵${price}%20for%20the%20${encodeURIComponent(product)}.%20Please%20confirm%20delivery.`;
-            window.open(whatsappLink, "_blank");
-        },
-        onClose: function(){
-            alert('Payment cancelled');
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Paystack payment function
+    function payProduct(product, price) {
+        let handler = PaystackPop.setup({
+            key: 'pk_live_98575428080557d261e91cb92fe745f878fc4278',
+            email: 'jbellingham771@gmail.com',
+            amount: price * 100,
+            currency: "GHS",
+            ref: '' + Math.floor((Math.random() * 1000000000) + 1),
+            callback: function(response){
+                let whatsappLink = `https://wa.me/0548164533?text=Hi!%20I%20just%20paid%20₵${price}%20for%20the%20${encodeURIComponent(product)}.%20Please%20confirm%20delivery.`;
+                window.open(whatsappLink, "_blank");
+            },
+            onClose: function(){
+                alert('Payment cancelled');
+            }
+        });
+        handler.openIframe();
+    }
+
+    // Bind Buy Now buttons (main page & modals)
+    const buyButtons = document.querySelectorAll('.buy-btn');
+    buyButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productName = this.getAttribute('data-product') || this.innerText.includes('SilverCrest Blender') ? 'SilverCrest Blender' : 'Product';
+            const price = parseInt(this.getAttribute('data-price')) || 100;
+            // Call Paystack function
+            payProduct(productName, price);
+        });
+    });
+
+    // Bind modal overlay buttons
+    const productCards = document.querySelectorAll('.product-card');
+    productCards.forEach(card => {
+        const modalId = card.getAttribute('data-modal');
+        const modal = document.getElementById(modalId);
+        const overlayBtn = card.querySelector('.overlay button');
+        overlayBtn.addEventListener('click', function(){
+            modal.style.display = 'flex';
+        });
+    });
+
+    // Bind modal close buttons
+    const closeButtons = document.querySelectorAll('.close');
+    closeButtons.forEach(btn => {
+        btn.addEventListener('click', function(){
+            btn.closest('.modal').style.display = 'none';
+        });
+    });
+
+    // Close modal if clicking outside content
+    window.addEventListener('click', function(event){
+        if(event.target.classList.contains('modal')){
+            event.target.style.display = 'none';
         }
     });
-    handler.openIframe();
-}
 
-// Modal JS
-const productCards = document.querySelectorAll('.product-card');
-productCards.forEach(card => {
-    const modalId = card.getAttribute('data-modal');
-    const modal = document.getElementById(modalId);
-    card.querySelector('.overlay button').onclick = () => { modal.style.display = 'flex'; };
+    // Expose payProduct globally for inline onclicks
+    window.payProduct = payProduct;
+
 });
-
-const closeButtons = document.querySelectorAll('.close');
-closeButtons.forEach(btn => { btn.onclick = () => { btn.closest('.modal').style.display = 'none'; }; });
-
-window.onclick = function(event) {
-    if(event.target.classList.contains('modal')) { event.target.style.display = 'none'; }
-}
 </script>
 
 </body>
