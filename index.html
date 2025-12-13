@@ -40,6 +40,12 @@ header { background: linear-gradient(90deg,#000,#222); color: gold; text-align:c
 .cart button.checkout { width:100%; padding:12px 0; border:none; border-radius:12px; font-weight:700; font-size:1em; background:linear-gradient(90deg,#000,#555); color:gold; cursor:pointer; }
 .cart button.checkout:hover { background:linear-gradient(90deg,gold,red); color:#fff; }
 
+/* Modal */
+.modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; }
+.modal-content { background:#fff; padding:20px; border-radius:15px; text-align:center; max-width:400px; width:90%; position:relative; }
+.close { position:absolute; top:10px; right:15px; font-size:1.5em; cursor:pointer; }
+.modal-content button { margin:10px; padding:10px 20px; font-weight:bold; border:none; border-radius:10px; cursor:pointer; }
+
 /* Mobile */
 @media (max-width:768px){ .container{flex-direction:column;} .cart{width:100%;} .products{width:100%;} }
 </style>
@@ -53,62 +59,62 @@ header { background: linear-gradient(90deg,#000,#222); color: gold; text-align:c
   <!-- PRODUCTS -->
   <div class="products">
 
-    <div class="card">
+    <div class="card" data-product="SilverCrest Blender" data-price="300">
       <img src="images/blender.jpg" alt="Blender">
       <div class="card-body">
         <h3>SilverCrest Blender</h3>
         <p class="price">₵300</p>
-        <button class="buy" onclick="addToCart('SilverCrest Blender',300)">Add to Cart</button>
+        <button class="buy" onclick="openModal('SilverCrest Blender',300)">Add to Cart</button>
         <button class="whatsapp" onclick="confirmWhatsApp('SilverCrest Blender',300)">Confirm on WhatsApp</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" data-product="Luxury Headphones" data-price="250">
       <img src="images/headphones.jpg" alt="Headphones">
       <div class="card-body">
         <h3>Luxury Headphones</h3>
         <p class="price">₵250</p>
-        <button class="buy" onclick="addToCart('Luxury Headphones',250)">Add to Cart</button>
+        <button class="buy" onclick="openModal('Luxury Headphones',250)">Add to Cart</button>
         <button class="whatsapp" onclick="confirmWhatsApp('Luxury Headphones',250)">Confirm on WhatsApp</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" data-product="Smart Watch" data-price="400">
       <img src="images/smartwatch.jpg" alt="Smart Watch">
       <div class="card-body">
         <h3>Smart Watch</h3>
         <p class="price">₵400</p>
-        <button class="buy" onclick="addToCart('Smart Watch',400)">Add to Cart</button>
+        <button class="buy" onclick="openModal('Smart Watch',400)">Add to Cart</button>
         <button class="whatsapp" onclick="confirmWhatsApp('Smart Watch',400)">Confirm on WhatsApp</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" data-product="USB & Cables" data-price="50">
       <img src="images/accessories.jpg" alt="Accessories">
       <div class="card-body">
         <h3>USB & Cables</h3>
         <p class="price">₵50</p>
-        <button class="buy" onclick="addToCart('USB & Cables',50)">Add to Cart</button>
+        <button class="buy" onclick="openModal('USB & Cables',50)">Add to Cart</button>
         <button class="whatsapp" onclick="confirmWhatsApp('USB & Cables',50)">Confirm on WhatsApp</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" data-product="MTN Data Bundle" data-price="50">
       <img src="images/data-bundles.jpg" alt="Data Bundles">
       <div class="card-body">
         <h3>MTN Data Bundle</h3>
         <p class="price">₵50</p>
-        <button class="buy" onclick="addToCart('MTN Data Bundle',50)">Add to Cart</button>
+        <button class="buy" onclick="openModal('MTN Data Bundle',50)">Add to Cart</button>
         <button class="whatsapp" onclick="confirmWhatsApp('MTN Data Bundle',50)">Confirm on WhatsApp</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" data-product="Power Bank" data-price="150">
       <img src="images/powerbank.jpg" alt="Power Bank">
       <div class="card-body">
         <h3>Power Bank</h3>
         <p class="price">₵150</p>
-        <button class="buy" onclick="addToCart('Power Bank',150)">Add to Cart</button>
+        <button class="buy" onclick="openModal('Power Bank',150)">Add to Cart</button>
         <button class="whatsapp" onclick="confirmWhatsApp('Power Bank',150)">Confirm on WhatsApp</button>
       </div>
     </div>
@@ -125,6 +131,19 @@ header { background: linear-gradient(90deg,#000,#222); color: gold; text-align:c
 
 </div>
 
+<!-- MODAL -->
+<div id="productModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h3 id="modalTitle"></h3>
+    <p>Price: ₵<span id="modalPrice"></span></p>
+    <p>Quantity: <span id="modalQty">1</span></p>
+    <button onclick="addMore()">Add More</button>
+    <h4>Subtotal: ₵<span id="modalSubtotal"></span></h4>
+    <button onclick="paySingleProduct()">Pay Now</button>
+  </div>
+</div>
+
 <!-- PAYSTACK -->
 <script src="https://js.paystack.co/v1/inline.js"></script>
 
@@ -134,7 +153,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getFirestore, collection, addDoc, serverTimestamp } 
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* 🔥 FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyCZdOPS1D0pSW8jYjL1p7Q9JpES06Pc-UE",
   authDomain: "luxe-5a8e8.firebaseapp.com",
@@ -156,46 +174,87 @@ window.serverTimestamp = serverTimestamp;
 <script>
 let cart = [];
 let total = 0;
-
-// Add to Cart
-function addToCart(name, price){
-  cart.push({name, price});
-  total += price;
-  renderCart();
-}
+let modalQty = 1;
+let currentProduct = "";
+let currentPrice = 0;
 
 // Render Cart
 function renderCart(){
   const cartDiv = document.getElementById("cartItems");
   cartDiv.innerHTML = "";
   cart.forEach(item=>{
-    cartDiv.innerHTML += `<div class="cart-item"><span>${item.name}</span><span>₵${item.price}</span></div>`;
+    cartDiv.innerHTML += `<div class="cart-item"><span>${item.name} x${item.qty}</span><span>₵${item.price*item.qty}</span></div>`;
   });
+  total = cart.reduce((sum,i)=>sum+i.price*i.qty,0);
   document.getElementById("total").innerText = total;
 }
 
-// Generate Order ID
-function generateOrderID(){
-  return "LUXE-" + Date.now();
+// Add to Cart from main page (opens modal)
+function openModal(name, price){
+  currentProduct = name;
+  currentPrice = price;
+  modalQty = 1;
+  document.getElementById("modalTitle").innerText = name;
+  document.getElementById("modalPrice").innerText = price;
+  document.getElementById("modalQty").innerText = modalQty;
+  document.getElementById("modalSubtotal").innerText = price;
+  document.getElementById("productModal").style.display = "flex";
 }
 
-// Paystack Checkout
+function closeModal(){
+  document.getElementById("productModal").style.display = "none";
+}
+
+function addMore(){
+  modalQty++;
+  document.getElementById("modalQty").innerText = modalQty;
+  document.getElementById("modalSubtotal").innerText = modalQty * currentPrice;
+}
+
+// Pay single product from modal
+function paySingleProduct(){
+  let amount = currentPrice * modalQty;
+  let handler = PaystackPop.setup({
+    key: 'pk_live_98575428080557d261e91cb92fe745f878fc4278',
+    email: 'jbellingham771@gmail.com',
+    amount: amount * 100,
+    currency: 'GHS',
+    ref: ''+Math.floor(Math.random()*1000000000+1),
+    callback: function(response){
+      saveOrder(currentProduct, modalQty, amount, response.reference);
+
+      let msg = `Hi! I just paid ₵${amount} for ${currentProduct} (Quantity: ${modalQty})`;
+      window.open(`https://wa.me/0548164533?text=${encodeURIComponent(msg)}`,"_blank");
+
+      closeModal();
+      cart.push({name: currentProduct, price: currentPrice, qty: modalQty});
+      renderCart();
+    },
+    onClose: function(){ alert('Payment cancelled'); }
+  });
+  handler.openIframe();
+}
+
+// Main cart checkout
 function payNow(){
   if(cart.length===0){ alert("Cart is empty"); return; }
 
-  let orderID = generateOrderID();
+  let orderID = "LUXE-"+Date.now();
+  let amount = total;
 
   let handler = PaystackPop.setup({
     key: 'pk_live_98575428080557d261e91cb92fe745f878fc4278',
     email: 'jbellingham771@gmail.com',
-    amount: total*100,
-    currency: "GHS",
+    amount: amount * 100,
+    currency: 'GHS',
     ref: ''+Math.floor(Math.random()*1000000000+1),
     callback: function(response){
-      saveOrder(orderID,response.reference);
+      cart.forEach(item=>{
+        saveOrder(item.name, item.qty, item.price*item.qty, response.reference);
+      });
 
-      let msg = `Order ID: ${orderID}\nTotal: ₵${total}\nItems:\n`;
-      cart.forEach(i=> msg += `- ${i.name}\n`);
+      let msg = `Order ID: ${orderID}\nTotal: ₵${amount}\nItems:\n`;
+      cart.forEach(i=> msg += `- ${i.name} x${i.qty}\n`);
 
       window.open(`https://wa.me/0548164533?text=${encodeURIComponent(msg)}`,"_blank");
 
@@ -209,13 +268,14 @@ function payNow(){
 }
 
 // Save Order to Firebase
-async function saveOrder(orderID, ref){
+async function saveOrder(name, qty, totalPrice, ref){
   try{
     await addDoc(collection(db,"orders"),{
-      orderID,
+      orderID: "LUXE-"+Date.now(),
+      name,
+      qty,
+      totalPrice,
       reference: ref,
-      items: cart,
-      total,
       date: serverTimestamp()
     });
   }catch(e){ console.error(e); }
@@ -227,6 +287,5 @@ function confirmWhatsApp(name, price){
   window.open(`https://wa.me/0548164533?text=${encodeURIComponent(msg)}`,"_blank");
 }
 </script>
-
 </body>
-</html>
+      </html>
