@@ -5,232 +5,228 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Luxe Gadget Store</title>
 
+<!-- Fonts & CSS -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:Montserrat,sans-serif;
-  background:#fff;
-  color:#111;
-}
-header{
-  background:#000;
-  color:gold;
-  text-align:center;
-  padding:20px;
-  font-size:2rem;
-  font-weight:700;
-}
-main{
-  max-width:1200px;
-  margin:30px auto;
-  padding:0 15px;
-}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:25px;
-}
-.card{
-  border:2px solid gold;
-  border-radius:18px;
-  overflow:hidden;
-  position:relative;
-}
-.card img{
-  width:100%;
-  height:200px;
-  object-fit:cover;
-}
-.info{
-  padding:15px;
-  text-align:center;
-}
-.info h3{margin-bottom:6px}
-.price{color:gold;font-weight:700;font-size:1.1rem}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Montserrat', sans-serif; background-color:#fff; color:#222; }
 
-button{
-  margin-top:10px;
-  padding:10px 18px;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:700;
-}
-.buy{
-  background:#000;
-  color:gold;
-}
-.buy:hover{background:gold;color:#000}
+/* Header */
+header { background: linear-gradient(90deg,#000,#222); color: gold; text-align:center; padding:25px 0; font-size:2em; font-weight:700; letter-spacing:1px; text-shadow:1px 1px 3px #333; }
 
-.wa{
-  background:#25D366;
-  color:white;
-}
+/* Container */
+.container { max-width:1200px; margin:30px auto; display:flex; flex-wrap:wrap; gap:30px; padding:0 15px; }
 
-/* overlay */
-.overlay{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  opacity:0;
-  transition:.3s;
-}
-.card:hover .overlay{opacity:1}
+/* Product Cards */
+.products { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:25px; flex:2; }
+.card { border:2px solid gold; border-radius:20px; overflow:hidden; transition: transform 0.4s, box-shadow 0.4s; cursor:pointer; background:#fff; }
+.card:hover { transform: translateY(-8px) scale(1.03); box-shadow:0 15px 30px rgba(0,0,0,0.4); }
+.card img { width:100%; height:220px; object-fit:cover; transition: transform 0.4s; }
+.card:hover img { transform:scale(1.05); }
+.card-body { padding:20px; text-align:center; }
+.card-body h3 { margin-bottom:10px; color:#000; }
+.card-body p.price { font-weight:700; color:gold; margin-bottom:10px; font-size:1.2em; }
+.card-body button { display:block; width:90%; margin:10px auto; padding:12px 0; border:none; border-radius:12px; font-weight:700; cursor:pointer; transition:all 0.3s; font-size:1em; }
+.card-body button.buy { background:linear-gradient(90deg,#000,#555); color:gold; }
+.card-body button.buy:hover { background:linear-gradient(90deg,gold,red); color:#fff; transform:scale(1.05); }
+.card-body button.whatsapp { background:#25D366; color:#fff; }
+.card-body button.whatsapp:hover { opacity:0.9; }
 
-/* modal */
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.7);
-  justify-content:center;
-  align-items:center;
-  z-index:1000;
-}
-.modal-content{
-  background:#fff;
-  padding:20px;
-  width:90%;
-  max-width:420px;
-  border-radius:15px;
-  text-align:center;
-  position:relative;
-}
-.close{
-  position:absolute;
-  top:10px;
-  right:15px;
-  font-size:22px;
-  cursor:pointer;
-}
-.modal img{
-  width:100%;
-  border-radius:10px;
-}
-footer{
-  margin-top:40px;
-  padding:15px;
-  background:#000;
-  color:gold;
-  text-align:center;
-}
+/* Cart */
+.cart { flex:1; border:2px solid gold; border-radius:20px; padding:20px; height:min-content; background:#fff; }
+.cart h2 { text-align:center; margin-bottom:20px; }
+.cart-item { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #ccc; }
+.cart h3 { text-align:right; margin-top:15px; margin-bottom:15px; }
+.cart button.checkout { width:100%; padding:12px 0; border:none; border-radius:12px; font-weight:700; font-size:1em; background:linear-gradient(90deg,#000,#555); color:gold; cursor:pointer; }
+.cart button.checkout:hover { background:linear-gradient(90deg,gold,red); color:#fff; }
+
+/* Mobile */
+@media (max-width:768px){ .container{flex-direction:column;} .cart{width:100%;} .products{width:100%;} }
 </style>
 </head>
 <body>
 
 <header>Luxe Gadget Store</header>
 
-<main>
-<div class="grid">
+<div class="container">
 
-<!-- PRODUCT CARD -->
-<div class="card">
-  <img src="images/blender.jpg">
-  <div class="overlay">
-    <button onclick="openModal('blenderModal')">View Details</button>
+  <!-- PRODUCTS -->
+  <div class="products">
+
+    <div class="card">
+      <img src="images/blender.jpg" alt="Blender">
+      <div class="card-body">
+        <h3>SilverCrest Blender</h3>
+        <p class="price">₵300</p>
+        <button class="buy" onclick="addToCart('SilverCrest Blender',300)">Add to Cart</button>
+        <button class="whatsapp" onclick="confirmWhatsApp('SilverCrest Blender',300)">Confirm on WhatsApp</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="images/headphones.jpg" alt="Headphones">
+      <div class="card-body">
+        <h3>Luxury Headphones</h3>
+        <p class="price">₵250</p>
+        <button class="buy" onclick="addToCart('Luxury Headphones',250)">Add to Cart</button>
+        <button class="whatsapp" onclick="confirmWhatsApp('Luxury Headphones',250)">Confirm on WhatsApp</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="images/smartwatch.jpg" alt="Smart Watch">
+      <div class="card-body">
+        <h3>Smart Watch</h3>
+        <p class="price">₵400</p>
+        <button class="buy" onclick="addToCart('Smart Watch',400)">Add to Cart</button>
+        <button class="whatsapp" onclick="confirmWhatsApp('Smart Watch',400)">Confirm on WhatsApp</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="images/accessories.jpg" alt="Accessories">
+      <div class="card-body">
+        <h3>USB & Cables</h3>
+        <p class="price">₵50</p>
+        <button class="buy" onclick="addToCart('USB & Cables',50)">Add to Cart</button>
+        <button class="whatsapp" onclick="confirmWhatsApp('USB & Cables',50)">Confirm on WhatsApp</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="images/data-bundles.jpg" alt="Data Bundles">
+      <div class="card-body">
+        <h3>MTN Data Bundle</h3>
+        <p class="price">₵50</p>
+        <button class="buy" onclick="addToCart('MTN Data Bundle',50)">Add to Cart</button>
+        <button class="whatsapp" onclick="confirmWhatsApp('MTN Data Bundle',50)">Confirm on WhatsApp</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="images/powerbank.jpg" alt="Power Bank">
+      <div class="card-body">
+        <h3>Power Bank</h3>
+        <p class="price">₵150</p>
+        <button class="buy" onclick="addToCart('Power Bank',150)">Add to Cart</button>
+        <button class="whatsapp" onclick="confirmWhatsApp('Power Bank',150)">Confirm on WhatsApp</button>
+      </div>
+    </div>
+
   </div>
-  <div class="info">
-    <h3>SilverCrest Blender</h3>
-    <div class="price">₵300</div>
-    <button class="buy" onclick="payProduct('SilverCrest Blender',300)">Buy Now</button>
-    <button class="wa" onclick="confirmWA('SilverCrest Blender',300)">Confirm on WhatsApp</button>
+
+  <!-- CART -->
+  <div class="cart">
+    <h2>Cart</h2>
+    <div id="cartItems"></div>
+    <h3>Total: ₵<span id="total">0</span></h3>
+    <button class="checkout" onclick="payNow()">Checkout & Pay</button>
   </div>
+
 </div>
-
-<div class="card">
-  <img src="images/headphones.jpg">
-  <div class="overlay">
-    <button onclick="openModal('headphonesModal')">View Details</button>
-  </div>
-  <div class="info">
-    <h3>Luxury Headphones</h3>
-    <div class="price">₵250</div>
-    <button class="buy" onclick="payProduct('Luxury Headphones',250)">Buy Now</button>
-    <button class="wa" onclick="confirmWA('Luxury Headphones',250)">Confirm on WhatsApp</button>
-  </div>
-</div>
-
-<div class="card">
-  <img src="images/smartwatch.jpg">
-  <div class="overlay">
-    <button onclick="openModal('watchModal')">View Details</button>
-  </div>
-  <div class="info">
-    <h3>Smart Watch</h3>
-    <div class="price">₵400</div>
-    <button class="buy" onclick="payProduct('Smart Watch',400)">Buy Now</button>
-    <button class="wa" onclick="confirmWA('Smart Watch',400)">Confirm on WhatsApp</button>
-  </div>
-</div>
-
-</div>
-</main>
-
-<!-- MODALS -->
-<div id="blenderModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeModal('blenderModal')">&times;</span>
-    <img src="images/blender.jpg">
-    <h3>SilverCrest Blender</h3>
-    <p>2.5L powerful luxury blender</p>
-    <button class="buy" onclick="payProduct('SilverCrest Blender',300)">Buy Now</button>
-    <button class="wa" onclick="confirmWA('SilverCrest Blender',300)">Confirm on WhatsApp</button>
-  </div>
-</div>
-
-<div id="headphonesModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeModal('headphonesModal')">&times;</span>
-    <img src="images/headphones.jpg">
-    <h3>Luxury Headphones</h3>
-    <p>Noise cancelling wireless headphones</p>
-    <button class="buy" onclick="payProduct('Luxury Headphones',250)">Buy Now</button>
-    <button class="wa" onclick="confirmWA('Luxury Headphones',250)">Confirm on WhatsApp</button>
-  </div>
-</div>
-
-<div id="watchModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeModal('watchModal')">&times;</span>
-    <img src="images/smartwatch.jpg">
-    <h3>Smart Watch</h3>
-    <p>Fitness & notifications tracker</p>
-    <button class="buy" onclick="payProduct('Smart Watch',400)">Buy Now</button>
-    <button class="wa" onclick="confirmWA('Smart Watch',400)">Confirm on WhatsApp</button>
-  </div>
-</div>
-
-<footer>© 2025 Luxe Gadget Store</footer>
 
 <!-- PAYSTACK -->
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script>
-function openModal(id){document.getElementById(id).style.display='flex'}
-function closeModal(id){document.getElementById(id).style.display='none'}
 
-function confirmWA(product,price){
-  let msg=`Hi! I want to confirm purchase of ₵${price} ${product}`;
-  window.open(`https://wa.me/0548164533?text=${encodeURIComponent(msg)}`,'_blank');
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } 
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* 🔥 FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyCZdOPS1D0pSW8jYjL1p7Q9JpES06Pc-UE",
+  authDomain: "luxe-5a8e8.firebaseapp.com",
+  projectId: "luxe-5a8e8",
+  storageBucket: "luxe-5a8e8.appspot.com",
+  messagingSenderId: "178257618326",
+  appId: "1:178257618326:web:3c6c26f267dfcf73d3e9b7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window.db = db;
+window.addDoc = addDoc;
+window.collection = collection;
+window.serverTimestamp = serverTimestamp;
+</script>
+
+<!-- APP LOGIC -->
+<script>
+let cart = [];
+let total = 0;
+
+// Add to Cart
+function addToCart(name, price){
+  cart.push({name, price});
+  total += price;
+  renderCart();
 }
 
-function payProduct(product,price){
+// Render Cart
+function renderCart(){
+  const cartDiv = document.getElementById("cartItems");
+  cartDiv.innerHTML = "";
+  cart.forEach(item=>{
+    cartDiv.innerHTML += `<div class="cart-item"><span>${item.name}</span><span>₵${item.price}</span></div>`;
+  });
+  document.getElementById("total").innerText = total;
+}
+
+// Generate Order ID
+function generateOrderID(){
+  return "LUXE-" + Date.now();
+}
+
+// Paystack Checkout
+function payNow(){
+  if(cart.length===0){ alert("Cart is empty"); return; }
+
+  let orderID = generateOrderID();
+
   let handler = PaystackPop.setup({
-    key:'pk_live_98575428080557d261e91cb92fe745f878fc4278',
-    email:'jbellingham771@gmail.com',
-    amount:price*100,
-    currency:'GHS',
-    callback:function(){
-      confirmWA(product,price);
-    }
+    key: 'pk_live_98575428080557d261e91cb92fe745f878fc4278',
+    email: 'jbellingham771@gmail.com',
+    amount: total*100,
+    currency: "GHS",
+    ref: ''+Math.floor(Math.random()*1000000000+1),
+    callback: function(response){
+      saveOrder(orderID,response.reference);
+
+      let msg = `Order ID: ${orderID}\nTotal: ₵${total}\nItems:\n`;
+      cart.forEach(i=> msg += `- ${i.name}\n`);
+
+      window.open(`https://wa.me/0548164533?text=${encodeURIComponent(msg)}`,"_blank");
+
+      cart=[];
+      total=0;
+      renderCart();
+    },
+    onClose: function(){ alert("Payment cancelled"); }
   });
   handler.openIframe();
+}
+
+// Save Order to Firebase
+async function saveOrder(orderID, ref){
+  try{
+    await addDoc(collection(db,"orders"),{
+      orderID,
+      reference: ref,
+      items: cart,
+      total,
+      date: serverTimestamp()
+    });
+  }catch(e){ console.error(e); }
+}
+
+// Confirm on WhatsApp
+function confirmWhatsApp(name, price){
+  let msg = `Hi, I want to confirm purchase of ${name} for ₵${price}`;
+  window.open(`https://wa.me/0548164533?text=${encodeURIComponent(msg)}`,"_blank");
 }
 </script>
 
 </body>
-    </html>
+</html>
