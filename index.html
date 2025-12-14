@@ -240,10 +240,8 @@ let allProductsData = [];
 let PaystackPop; // Global reference for the loaded Paystack object
 
 // --- CRITICAL: SAFE PAYSTACK LOADER ---
-// This function downloads the script safely only when needed.
 function loadPaystackScript() {
     return new Promise((resolve, reject) => {
-        // If already loaded, return it immediately
         if (window.PaystackPop) {
             PaystackPop = window.PaystackPop;
             resolve(PaystackPop);
@@ -258,7 +256,7 @@ function loadPaystackScript() {
                 console.log("Paystack script loaded successfully.");
                 resolve(PaystackPop);
             } else {
-                reject(new Error('Paystack script loaded but PaystackPop object not found.'));
+                reject(new Error('Paystack script loaded but PaystackPop object not found. This is a common error on slow networks or if the script is blocked.'));
             }
         };
         script.onerror = () => {
@@ -277,8 +275,9 @@ let firebaseInitialized = false;
 // Async function to handle Firebase imports and authentication
 async function initializeFirebase() {
     try {
+        // Dynamic imports for Firebase
         const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
-        const { getFirestore } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        const { getFirestore, collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
         const { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"); 
 
         const firebaseConfig = {
@@ -294,7 +293,7 @@ async function initializeFirebase() {
         db = getFirestore(app);
         auth = getAuth(app); 
         firebaseInitialized = true;
-        console.log("Firebase services initialized successfully.");
+        console.log("Firebase services initialized successfully and exposed.");
 
         // Auth Listeners
         const authModal = document.getElementById('authModal');
@@ -339,22 +338,24 @@ async function initializeFirebase() {
             catch (e) { console.error(e); }
         };
         
-        return true; // Success
+        // Expose Firebase modules for use in handlers
+        return { collection, addDoc, serverTimestamp, auth, db };
+
     } catch (error) {
-        console.error("CRITICAL: Firebase initialization failed.", error);
-        return false; // Failure
+        console.error("CRITICAL: Firebase initialization or Auth setup failed. Error:", error);
+        return false; 
     }
 }
 
-// Immediately run Firebase initialization
-const authEnabledPromise = initializeFirebase();
+// Immediately run Firebase initialization and store the promise
+const firebaseModulesPromise = initializeFirebase();
 
 // --- DOM HANDLERS ---
 document.addEventListener('DOMContentLoaded', () => {
-    initializeDOMHandlers(authEnabledPromise);
+    initializeDOMHandlers(firebaseModulesPromise);
 });
 
-function initializeDOMHandlers(authEnabledPromise) {
+function initializeDOMHandlers(firebaseModulesPromise) {
     
     // Data Init
     document.querySelectorAll('.card').forEach((card, index) => {
@@ -366,7 +367,7 @@ function initializeDOMHandlers(authEnabledPromise) {
         });
     });
 
-    // Menu
+    // Menu Handlers (Unchanged)
     const sideMenu = document.getElementById('sideMenu');
     const menuOverlay = document.getElementById('menuOverlay');
     const toggleMenu = () => {
@@ -383,10 +384,10 @@ function initializeDOMHandlers(authEnabledPromise) {
         window.open(`https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=Hello Luxe Store Customer Service, I need assistance.`, '_blank'); toggleMenu(); 
     };
 
-    // Close Modals
+    // Close Modals (Unchanged)
     document.querySelectorAll('.close, #viewerClose').forEach(c => c.onclick = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')));
 
-    // Cart System
+    // Cart System (Unchanged)
     const cartItems=document.getElementById('cartItems');
     const cartTotal=document.getElementById('cartTotal');
     function renderCart(){
@@ -404,7 +405,7 @@ function initializeDOMHandlers(authEnabledPromise) {
       cartTotal.textContent=total;
     }
 
-    // Image Viewer (Keep it brief)
+    // Product Card and Image Viewer Logic (Unchanged)
     const imageViewerModal = document.getElementById('imageViewerModal');
     const largeProductImage = document.getElementById('largeProductImage');
     const viewerPrev = document.getElementById('viewerPrev');
@@ -457,10 +458,10 @@ function initializeDOMHandlers(authEnabledPromise) {
       return `${type}-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.floor(Math.random()*900+100)}`;
     }
 
-    // === CORE PAYMENT HANDLER ===
+    // === CORE PAYMENT HANDLER - CRITICAL FIXES HERE ===
     async function handlePayment(email, amount, orderId, metadata, onSuccessCallback, btn) {
         
-        let originalText = btn.textContent;
+        const originalText = btn.textContent;
         btn.textContent = "Processing...";
         btn.disabled = true;
 
@@ -478,21 +479,20 @@ function initializeDOMHandlers(authEnabledPromise) {
                 metadata: metadata,
                 callback: onSuccessCallback,
                 onClose: () => {
-                    alert('Payment cancelled or closed.');
+                    console.log('Payment window closed by user.');
                     btn.textContent = originalText;
                     btn.disabled = false;
                 },
                 onError: (err) => {
-                    console.error("Paystack Error:", err);
-                    alert('Payment Initialization Failed. Check browser console for details.');
+                    console.error("Paystack API Error:", err);
+                    alert('Payment Initialization Failed. Please check the console for details, or check your browser for a pop-up blocked message.');
                     btn.textContent = originalText;
                     btn.disabled = false;
                 }
             });
             
-            // 3. Open Iframe
+            // 3. Open Iframe - THE FINAL STEP
             handler.openIframe(); 
-            // The button state will be reset by the callback/onClose handlers once the iframe session ends.
 
         } catch (error) {
             console.error("Payment setup error:", error);
@@ -506,9 +506,9 @@ function initializeDOMHandlers(authEnabledPromise) {
     // === CHECKOUT BUTTON (CART) ===
     document.getElementById('checkoutBtn').onclick = async function() {
         const btn = this;
-        const authEnabled = await authEnabledPromise;
+        const modules = await firebaseModulesPromise;
 
-        if(!authEnabled || !auth || !auth.currentUser){ alert('Please Sign In first.'); return; } 
+        if(!modules || !modules.auth.currentUser){ alert('Please Sign In first.'); return; } 
         if(cart.length===0){alert('Cart empty!'); return;}
         
         const name=document.getElementById('custName').value.trim();
@@ -519,15 +519,14 @@ function initializeDOMHandlers(authEnabledPromise) {
         if(!name||!phone||!email){alert('Please fill all details.'); return;}
 
         const orderId = generateOrderId("ORD");
-        const userId = auth.currentUser.uid;
+        const userId = modules.auth.currentUser.uid;
 
         await handlePayment(email, total, orderId, {}, async (res) => {
             // Success Callback
             try {
-                const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-                await addDoc(collection(db,'orders'),{
+                await modules.addDoc(modules.collection(modules.db,'orders'),{
                     orderId, userId, customerName:name, customerPhone:phone, customerEmail:email,
-                    items:cart, totalAmount:total, status:'Paid', reference:res.reference, timestamp:serverTimestamp()
+                    items:cart, totalAmount:total, status:'Paid', reference:res.reference, timestamp:modules.serverTimestamp()
                 });
                 alert('Payment successful! Order ID: '+orderId);
                 cart=[]; renderCart(); document.getElementById('cartModal').classList.remove('show');
@@ -554,9 +553,9 @@ function initializeDOMHandlers(authEnabledPromise) {
 
     document.getElementById('mtnPay').onclick = async function() {
         const btn = this;
-        const authEnabled = await authEnabledPromise;
+        const modules = await firebaseModulesPromise;
 
-        if(!authEnabled || !auth || !auth.currentUser){ alert('Please Sign In first.'); return; } 
+        if(!modules || !modules.auth.currentUser){ alert('Please Sign In first.'); return; } 
         const number=document.getElementById('mtnNumber').value.trim();
         const name=document.getElementById('mtnName').value.trim();
         const email=document.getElementById('mtnEmail').value.trim();
@@ -565,17 +564,16 @@ function initializeDOMHandlers(authEnabledPromise) {
         if(number.length !== 10){alert('Invalid 10-digit MTN number (e.g., 054xxxxxxx).'); return;}
 
         const orderId = generateOrderId("MTN");
-        const userId = auth.currentUser.uid;
+        const userId = modules.auth.currentUser.uid;
 
         await handlePayment(email, selectedMTNPrice, orderId, {
             custom_fields: [{display_name:'MTN Number', variable_name:'mtn_number', value:number}]
         }, async (res) => {
             // Success Callback
             try {
-                const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-                await addDoc(collection(db,'mtn_orders'),{
+                await modules.addDoc(modules.collection(modules.db,'mtn_orders'),{
                     orderId, userId, customerName:name, customerPhone:number, customerEmail:email,
-                    bundle:selectedMTNBundle, amount:selectedMTNPrice, status:'Paid', reference:res.reference, timestamp:serverTimestamp()
+                    bundle:selectedMTNBundle, amount:selectedMTNPrice, status:'Paid', reference:res.reference, timestamp:modules.serverTimestamp()
                 });
                 alert('MTN Bundle Purchased! Order ID: '+orderId);
                 document.getElementById('mtnModal').classList.remove('show');
@@ -587,13 +585,13 @@ function initializeDOMHandlers(authEnabledPromise) {
         }, btn);
     };
     
-    // WhatsApp Order Handler
+    // WhatsApp Order Handler (Unchanged)
     const orderBtnHandler = document.createElement('button');
     orderBtnHandler.id = 'orderBtn_handler'; orderBtnHandler.style.display = 'none';
     document.body.appendChild(orderBtnHandler);
     orderBtnHandler.onclick = async () => {
-        const authEnabled = await authEnabledPromise;
-        if(!authEnabled || !auth || !auth.currentUser){ alert('Please Sign In first.'); return; }
+        const modules = await firebaseModulesPromise;
+        if(!modules || !modules.auth.currentUser){ alert('Please Sign In first.'); return; }
         if(cart.length===0){alert('Cart empty!'); return;}
         
         let total = 0;
@@ -604,7 +602,7 @@ function initializeDOMHandlers(authEnabledPromise) {
           total += subtotal;
         });
 
-        let message=`Hello Luxe Store! I am confirming my order details for manual processing.\n\n*Account Email:* ${auth.currentUser.email}\n\n*--- ORDER SUMMARY ---*${itemsList}\n\n*GRAND TOTAL: ₵${total}*\n\n*--- CUSTOMER & DELIVERY DETAILS ---*
+        let message=`Hello Luxe Store! I am confirming my order details for manual processing.\n\n*Account Email:* ${modules.auth.currentUser.email}\n\n*--- ORDER SUMMARY ---*${itemsList}\n\n*GRAND TOTAL: ₵${total}*\n\n*--- CUSTOMER & DELIVERY DETAILS ---*
 Please use the following information for my delivery:
 \n\u2022 *Full Name:* [ENTER YOUR FULL NAME]
 \n\u2022 *Phone Number:* [ENTER YOUR ACTIVE PHONE NUMBER]
