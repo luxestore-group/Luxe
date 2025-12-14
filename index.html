@@ -3,22 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Luxe World Store</title>
+<title>Luxe Gadget Store</title>
 
 <!-- Fonts & CSS -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: 'Montserrat', sans-serif; background-color:#fff; color:#222; }
+body { font-family: 'Montserrat', sans-serif; background:#fff; color:#222; }
 
 /* Header */
 header { background: linear-gradient(90deg,#000,#222); color: gold; text-align:center; padding:25px 0; font-size:2em; font-weight:700; letter-spacing:1px; text-shadow:1px 1px 3px #333; }
 
 /* Container */
-.container { max-width:1200px; margin:30px auto; display:flex; flex-wrap:wrap; gap:30px; padding:0 15px; }
+.container { max-width:1200px; margin:30px auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:30px; padding:0 15px; }
 
 /* Product Cards */
-.products { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:25px; flex:2; }
 .card { border:2px solid gold; border-radius:20px; overflow:hidden; transition: transform 0.4s, box-shadow 0.4s; cursor:pointer; background:#fff; }
 .card:hover { transform: translateY(-8px) scale(1.03); box-shadow:0 15px 30px rgba(0,0,0,0.4); }
 .card img { width:100%; height:220px; object-fit:cover; transition: transform 0.4s; }
@@ -31,214 +30,108 @@ header { background: linear-gradient(90deg,#000,#222); color: gold; text-align:c
 .card-body button.buy:hover { background:linear-gradient(90deg,gold,red); color:#fff; transform:scale(1.05); }
 .card-body button.whatsapp { background:#25D366; color:#fff; }
 .card-body button.whatsapp:hover { opacity:0.9; }
+.card-body button.details { background:#333; color:#fff; }
+.card-body button.details:hover { background:gold; color:#000; }
 
-/* Cart */
-.cart { flex:1; border:2px solid gold; border-radius:20px; padding:20px; height:min-content; background:#fff; }
-.cart h2 { text-align:center; margin-bottom:20px; }
-.cart-item { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #ccc; }
-.cart h3 { text-align:right; margin-top:15px; margin-bottom:15px; }
-.cart button.checkout { width:100%; padding:12px 0; border:none; border-radius:12px; font-weight:700; font-size:1em; background:linear-gradient(90deg,#000,#555); color:gold; cursor:pointer; }
-.cart button.checkout:hover { background:linear-gradient(90deg,gold,red); color:#fff; }
-
-/* Modal */
+/* Modals */
 .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; }
-.modal-content { background:#fff; padding:20px; border-radius:15px; text-align:center; max-width:400px; width:90%; position:relative; }
+.modal-content { background:#fff; padding:20px; border-radius:15px; text-align:center; max-width:450px; width:90%; position:relative; }
 .close { position:absolute; top:10px; right:15px; font-size:1.5em; cursor:pointer; }
-.modal-content button { margin:10px; padding:10px 20px; font-weight:bold; border:none; border-radius:10px; cursor:pointer; }
+.modal-content button { margin:5px; padding:8px 15px; font-weight:bold; border:none; border-radius:10px; cursor:pointer; }
 
-/* Mobile */
-@media (max-width:768px){ .container{flex-direction:column;} .cart{width:100%;} .products{width:100%;} }
+/* Grid for Data Packages */
+#bundlePackages { display:grid; grid-template-columns:repeat(2,1fr); gap:15px; text-align:left; }
+
+/* Responsive */
+@media (max-width:768px){ .container{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
 
-<header>Luxe World Store</header>
+<header>Luxe Gadget Store</header>
 
 <div class="container">
 
-  <!-- PRODUCTS -->
-  <div class="products">
+<!-- Blender -->
+<div class="card" data-product="SilverCrest Blender" data-price="300">
+  <img src="images/blender.jpg" alt="Blender">
+  <div class="card-body">
+    <h3>SilverCrest Blender</h3>
+    <p class="price">₵300</p>
+    <button class="buy" onclick="openModal('SilverCrest Blender',300)">Add to Cart</button>
+    <button class="whatsapp" onclick="confirmWhatsApp('SilverCrest Blender',300)">Confirm on WhatsApp</button>
+    <button class="details" onclick="openDetails('SilverCrest Blender','High-quality blender for smoothies and shakes. Includes 1 blender jar and manual.')">More Details</button>
+  </div>
+</div>
 
-    <div class="card" data-product="SilverCrest Blender" data-price="300">
-      <img src="images/blender.jpg" alt="Blender">
-      <div class="card-body">
-        <h3>SilverCrest Blender</h3>
-        <p class="price">₵300</p>
-        <button class="buy" onclick="openModal('SilverCrest Blender',300)">Add to Cart</button>
-        <button class="whatsapp" onclick="confirmWhatsApp('SilverCrest Blender',300)">Confirm on WhatsApp</button>
-      </div>
-    </div>
+<!-- Headphones -->
+<div class="card" data-product="Superbass Headphones" data-price="65">
+  <img src="images/headphones.jpg" alt="Headphones">
+  <div class="card-body">
+    <h3>Superbass Headphones</h3>
+    <p class="price">₵65</p>
+    <button class="buy" onclick="openModal('Superbass Headphones',65)">Add to Cart</button>
+    <button class="whatsapp" onclick="confirmWhatsApp('Superbass Headphones',65)">Confirm on WhatsApp</button>
+    <button class="details" onclick="openDetails('Superbass Headphones','Wireless headphones with superb bass. Includes carrying pouch.')">More Details</button>
+  </div>
+</div>
 
-    <div class="card" data-product="Superbass earphones" data-price="65">
-      <img src="images/headphones.jpg" alt="2in1 speaker earphones">
-      <div class="card-body">
-        <h3>Superbass Headphones</h3>
-        <p class="price">₵65</p>
-        <button class="buy" onclick="openModal('Superbass Earphones',65)">Add to Cart</button>
-        <button class="whatsapp" onclick="confirmWhatsApp('Superbass Earphones',65)">Confirm on WhatsApp</button>
-      </div>
-    </div>
+<!-- Smart Watch -->
+<div class="card" data-product="Smart Watch" data-price="200">
+  <img src="images/smartwatch.jpg" alt="Smart Watch">
+  <div class="card-body">
+    <h3>Smart Watch</h3>
+    <p class="price">₵200</p>
+    <button class="buy" onclick="openModal('Smart Watch',200)">Add to Cart</button>
+    <button class="whatsapp" onclick="confirmWhatsApp('Smart Watch',200)">Confirm on WhatsApp</button>
+    <button class="details" onclick="openDetails('Smart Watch','Smart watch with fitness tracker and heart rate monitor. Comes with charger.')">More Details</button>
+  </div>
+</div>
 
-    <div class="card" data-product="Smart Watch" data-price="200">
-      <img src="images/smartwatch.jpg" alt="Smart Watch">
-      <div class="card-body">
-        <h3>Smart Watch</h3>
-        <p class="price">₵200</p>
-        <button class="buy" onclick="openModal('Smart Watch',200)">Add to Cart</button>
-        <button class="whatsapp" onclick="confirmWhatsApp('Smart Watch',200)">Confirm on WhatsApp</button>
-      </div>
-    </div>
+<!-- Accessories -->
+<div class="card" data-product="USB & Cables Type C to Type C" data-price="50">
+  <img src="images/accessories.jpg" alt="Accessories">
+  <div class="card-body">
+    <h3>USB & Cables Type C</h3>
+    <p class="price">₵50</p>
+    <button class="buy" onclick="openModal('USB & Cables Type C',50)">Add to Cart</button>
+    <button class="whatsapp" onclick="confirmWhatsApp('USB & Cables Type C',50)">Confirm on WhatsApp</button>
+    <button class="details" onclick="openDetails('USB & Cables Type C','Set of Type C cables. Includes 3 cables with different lengths.')">More Details</button>
+  </div>
+</div>
 
-    <div class="card" data-product="USB & Cables Type C to Type C" data-price="50">
-      <img src="images/accessories.jpg" alt="Accessories">
-      <div class="card-body">
-        <h3>USB & Cables Type C to Type C</h3>
-        <p class="price">₵50</p>
-        <button class="buy" onclick="openModal('USB & Cables',50)">Add to Cart</button>
-        <button class="whatsapp" onclick="confirmWhatsApp('USB & Cables Type C to Type C',50)">Confirm on WhatsApp</button>
-      </div>
-    </div>
-
-   <!-- MTN Data Bundle Card -->
+<!-- MTN Data Bundle -->
 <div class="card" data-product="MTN Data Bundle">
-  <img src="images/databundles.jpg" alt="Data Bundles">
+  <img src="images/data-bundles.jpg" alt="Data Bundles">
   <div class="card-body">
     <h3>MTN Data Bundle</h3>
     <p class="price">₵5.50 - ₵60.00</p>
     <button class="buy" onclick="openDataBundleModal()">Add to Cart</button>
     <button class="whatsapp" onclick="confirmWhatsAppBundle()">Confirm on WhatsApp</button>
+    <button class="details" onclick="openDetails('MTN Data Bundle','Purchase MTN data packages. Various sizes from 1GB to 10GB.')">More Details</button>
   </div>
 </div>
 
-<!-- Data Bundle Modal -->
-<div id="dataBundleModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeDataBundleModal()">&times;</span>
-    <h3>MTN Data Packages</h3>
-    <div id="bundlePackages" style="display:grid; grid-template-columns:repeat(2,1fr); gap:15px; text-align:left;">
-      <!-- Packages injected by JS -->
-    </div>
-    <p>Quantity: <span id="bundleQty">1</span></p>
-    <button onclick="addMoreBundle()">Add More</button>
-    <h4>Subtotal: ₵<span id="bundleSubtotal">0</span></h4>
-    <button onclick="payBundle()">Checkout</button>
+<!-- Power Bank -->
+<div class="card" data-product="Power Bank" data-price="200">
+  <img src="images/powerbank.jpg" alt="Power Bank">
+  <div class="card-body">
+    <h3>Power Bank</h3>
+    <p class="price">₵200</p>
+    <button class="buy" onclick="openModal('Power Bank',200)">Add to Cart</button>
+    <button class="whatsapp" onclick="confirmWhatsApp('Power Bank',200)">Confirm on WhatsApp</button>
+    <button class="details" onclick="openDetails('Power Bank','10,000 mAh Power Bank. Includes USB cable.')">More Details</button>
   </div>
 </div>
 
-<style>
-.modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; }
-.modal-content { background:#fff; padding:20px; border-radius:15px; text-align:center; max-width:450px; width:90%; position:relative; }
-.close { position:absolute; top:10px; right:15px; font-size:1.5em; cursor:pointer; }
-.modal-content button { margin:5px; padding:8px 15px; font-weight:bold; border:none; border-radius:10px; cursor:pointer; }
-</style>
+</div> <!-- container -->
 
-<script>
-// Data packages and prices
-const dataPackages = [
-  {name:"1GB", price:5.50},{name:"2GB", price:12},
-  {name:"3GB", price:18},{name:"4GB", price:24},
-  {name:"5GB", price:30},{name:"6GB", price:36},
-  {name:"7GB", price:42},{name:"8GB", price:48},
-  {name:"9GB", price:54},{name:"10GB", price:60}
-];
-
-let selectedBundle = null;
-let bundleQty = 1;
-
-// Open modal and render packages
-function openDataBundleModal(){
-  const container = document.getElementById("bundlePackages");
-  container.innerHTML = "";
-  dataPackages.forEach(pkg=>{
-    const div = document.createElement("div");
-    div.innerHTML = `
-      <strong>${pkg.name} = ₵${pkg.price.toFixed(2)}</strong>
-      <button onclick="selectBundle('${pkg.name}',${pkg.price})">Add to Cart</button>
-    `;
-    container.appendChild(div);
-  });
-  bundleQty = 1;
-  document.getElementById("bundleQty").innerText = bundleQty;
-  document.getElementById("bundleSubtotal").innerText = selectedBundle ? (selectedBundle.price*bundleQty).toFixed(2) : "0";
-  document.getElementById("dataBundleModal").style.display = "flex";
-}
-
-// Select a package
-function selectBundle(name, price){
-  selectedBundle = {name, price};
-  bundleQty = 1;
-  document.getElementById("bundleQty").innerText = bundleQty;
-  document.getElementById("bundleSubtotal").innerText = (price*bundleQty).toFixed(2);
-}
-
-// Add more quantity
-function addMoreBundle(){
-  if(!selectedBundle){ alert("Select a package first"); return; }
-  bundleQty++;
-  document.getElementById("bundleQty").innerText = bundleQty;
-  document.getElementById("bundleSubtotal").innerText = (selectedBundle.price*bundleQty).toFixed(2);
-}
-
-// Checkout bundle with Paystack
-function payBundle(){
-  if(!selectedBundle){ alert("Select a package first"); return; }
-  const amount = selectedBundle.price * bundleQty;
-
-  let handler = PaystackPop.setup({
-    key: 'pk_live_98575428080557d261e91cb92fe745f878fc4278',
-    email: 'jbellingham771@gmail.com',
-    amount: amount*100,
-    currency: 'GHS',
-    ref: ''+Math.floor(Math.random()*1000000000+1),
-    callback: function(response){
-      let msg = `Hi! I just paid ₵${amount.toFixed(2)} for ${selectedBundle.name} (Quantity: ${bundleQty})`;
-      window.open(`https://wa.me/0548164533?text=${encodeURIComponent(msg)}`,"_blank");
-
-      // Add to cart internally if needed
-      cart.push({name:selectedBundle.name, price:selectedBundle.price, qty:bundleQty});
-      selectedBundle = null;
-      bundleQty = 1;
-      closeDataBundleModal();
-    },
-    onClose:function(){ alert("Payment cancelled"); }
-  });
-  handler.openIframe();
-}
-
-// Close modal
-function closeDataBundleModal(){
-  document.getElementById("dataBundleModal").style.display = "none";
-}
-
-// WhatsApp confirmation for selected MTN bundle
-function confirmWhatsAppBundle(){
-  if(!selectedBundle){ 
-    alert("Please select a data package first"); 
-    return; 
-  }
-  let amount = selectedBundle.price * bundleQty;
-  let msg = `Hi, I want to purchase ${bundleQty} x ${selectedBundle.name} for ₵${amount.toFixed(2)}`;
-  window.open(`https://wa.me/0548164533?text=${encodeURIComponent(msg)}`,"_blank");
-}
-</script>
-
-    <div class="card" data-product="Power Bank" data-price="200">
-      <img src="images/powerbank.jpg" alt="Power Bank">
-      <div class="card-body">
-        <h3>Power Bank</h3>
-        <p class="price">₵200</p>
-        <button class="buy" onclick="openModal('Power Bank',200)">Add to Cart</button>
-        <button class="whatsapp" onclick="confirmWhatsApp('Power Bank',200)">Confirm on WhatsApp</button>
-      </div>
-    </div>
-
-  </div>
-
-<!-- MODAL -->
+<!-- Product Details Modal -->
 <div id="productModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal()">&times;</span>
     <h3 id="modalTitle"></h3>
+    <p id="modalDesc"></p>
     <p>Price: ₵<span id="modalPrice"></span></p>
     <p>Quantity: <span id="modalQty">1</span></p>
     <button onclick="addMore()">Add More</button>
@@ -247,14 +140,26 @@ function confirmWhatsAppBundle(){
   </div>
 </div>
 
-<!-- PAYSTACK -->
+<!-- MTN Data Bundle Modal -->
+<div id="dataBundleModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeDataBundleModal()">&times;</span>
+    <h3>MTN Data Packages</h3>
+    <div id="bundlePackages"></div>
+    <p>Quantity: <span id="bundleQty">1</span></p>
+    <button onclick="addMoreBundle()">Add More</button>
+    <h4>Subtotal: ₵<span id="bundleSubtotal">0</span></h4>
+    <button onclick="payBundle()">Checkout</button>
+  </div>
+</div>
+
+<!-- Paystack -->
 <script src="https://js.paystack.co/v1/inline.js"></script>
 
-<!-- FIREBASE -->
+<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } 
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCZdOPS1D0pSW8jYjL1p7Q9JpES06Pc-UE",
@@ -264,7 +169,6 @@ const firebaseConfig = {
   messagingSenderId: "178257618326",
   appId: "1:178257618326:web:3c6c26f267dfcf73d3e9b7"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 window.db = db;
@@ -273,122 +177,119 @@ window.collection = collection;
 window.serverTimestamp = serverTimestamp;
 </script>
 
-<!-- APP LOGIC -->
 <script>
+// Global variables
 let cart = [];
 let total = 0;
 let modalQty = 1;
 let currentProduct = "";
 let currentPrice = 0;
 
-// Render Cart
-function renderCart(){
-  const cartDiv = document.getElementById("cartItems");
-  cartDiv.innerHTML = "";
-  cart.forEach(item=>{
-    cartDiv.innerHTML += `<div class="cart-item"><span>${item.name} x${item.qty}</span><span>₵${item.price*item.qty}</span></div>`;
-  });
-  total = cart.reduce((sum,i)=>sum+i.price*i.qty,0);
-  document.getElementById("total").innerText = total;
-}
-
-// Add to Cart from main page (opens modal)
+// Product Modal
 function openModal(name, price){
   currentProduct = name;
   currentPrice = price;
   modalQty = 1;
   document.getElementById("modalTitle").innerText = name;
+  document.getElementById("modalDesc").innerText = "High-quality product. Check delivery info in your order confirmation.";
   document.getElementById("modalPrice").innerText = price;
   document.getElementById("modalQty").innerText = modalQty;
   document.getElementById("modalSubtotal").innerText = price;
   document.getElementById("productModal").style.display = "flex";
 }
+function closeModal(){ document.getElementById("productModal").style.display = "none"; }
+function addMore(){ modalQty++; document.getElementById("modalQty").innerText=modalQty; document.getElementById("modalSubtotal").innerText=(modalQty*currentPrice).toFixed(2); }
 
-function closeModal(){
-  document.getElementById("productModal").style.display = "none";
-}
-
-function addMore(){
-  modalQty++;
-  document.getElementById("modalQty").innerText = modalQty;
-  document.getElementById("modalSubtotal").innerText = modalQty * currentPrice;
-}
-
-// Pay single product from modal
+// Paystack Single Product
 function paySingleProduct(){
-  let amount = currentPrice * modalQty;
+  let amount = currentPrice*modalQty;
   let handler = PaystackPop.setup({
     key: 'pk_live_98575428080557d261e91cb92fe745f878fc4278',
     email: 'jbellingham771@gmail.com',
-    amount: amount * 100,
+    amount: amount*100,
     currency: 'GHS',
     ref: ''+Math.floor(Math.random()*1000000000+1),
     callback: function(response){
       saveOrder(currentProduct, modalQty, amount, response.reference);
-
-      let msg = `Hi! I just paid ₵${amount} for ${currentProduct} (Quantity: ${modalQty})`;
+      let msg=`Hi! I just paid ₵${amount} for ${currentProduct} (Quantity: ${modalQty})`;
       window.open(`https://wa.me/0548164533?text=${encodeURIComponent(msg)}`,"_blank");
-
+      cart.push({name:currentProduct,price:currentPrice,qty:modalQty});
       closeModal();
-      cart.push({name: currentProduct, price: currentPrice, qty: modalQty});
-      renderCart();
     },
     onClose: function(){ alert('Payment cancelled'); }
   });
   handler.openIframe();
 }
 
-// Main cart checkout
-function payNow(){
-  if(cart.length===0){ alert("Cart is empty"); return; }
-
-  let orderID = "LUXE-"+Date.now();
-  let amount = total;
-
-  let handler = PaystackPop.setup({
-    key: 'pk_live_98575428080557d261e91cb92fe745f878fc4278',
-    email: 'jbellingham771@gmail.com',
-    amount: amount * 100,
-    currency: 'GHS',
-    ref: ''+Math.floor(Math.random()*1000000000+1),
-    callback: function(response){
-      cart.forEach(item=>{
-        saveOrder(item.name, item.qty, item.price*item.qty, response.reference);
-      });
-
-      let msg = `Order ID: ${orderID}\nTotal: ₵${amount}\nItems:\n`;
-      cart.forEach(i=> msg += `- ${i.name} x${i.qty}\n`);
-
-      window.open(`https://wa.me/0548164533?text=${encodeURIComponent(msg)}`,"_blank");
-
-      cart=[];
-      total=0;
-      renderCart();
-    },
-    onClose: function(){ alert("Payment cancelled"); }
-  });
-  handler.openIframe();
-}
-
-// Save Order to Firebase
-async function saveOrder(name, qty, totalPrice, ref){
-  try{
-    await addDoc(collection(db,"orders"),{
-      orderID: "LUXE-"+Date.now(),
-      name,
-      qty,
-      totalPrice,
-      reference: ref,
-      date: serverTimestamp()
-    });
-  }catch(e){ console.error(e); }
-}
-
-// Confirm on WhatsApp
+// WhatsApp confirmation
 function confirmWhatsApp(name, price){
   let msg = `Hi, I want to confirm purchase of ${name} for ₵${price}`;
   window.open(`https://wa.me/0548164533?text=${encodeURIComponent(msg)}`,"_blank");
 }
+
+// Product Details Modal
+function openDetails(name, desc){
+  document.getElementById("modalTitle").innerText=name;
+  document.getElementById("modalDesc").innerText=desc;
+  document.getElementById("modalPrice").innerText="";
+  document.getElementById("modalQty").innerText="1";
+  document.getElementById("modalSubtotal").innerText="";
+  document.getElementById("productModal").style.display="flex";
+}
+
+// MTN Data Bundle
+const dataPackages = [
+  {name:"1GB", price:5.50},{name:"2GB", price:12},
+  {name:"3GB", price:18},{name:"4GB", price:24},
+  {name:"5GB", price:30},{name:"6GB", price:36},
+  {name:"7GB", price:42},{name:"8GB", price:48},
+  {name:"9GB", price:54},{name:"10GB", price:60}
+];
+let selectedBundle=null, bundleQty=1;
+
+function openDataBundleModal(){
+  const container=document.getElementById("bundlePackages");
+  container.innerHTML="";
+  dataPackages.forEach(pkg=>{
+    const div=document.createElement("div");
+    div.innerHTML=`<strong>${pkg.name} = ₵${pkg.price.toFixed(2)}</strong> <button onclick="selectBundle('${pkg.name}',${pkg.price})">Add to Cart</button>`;
+    container.appendChild(div);
+  });
+  bundleQty=1;
+  document.getElementById("bundleQty").innerText=bundleQty;
+  document.getElementById("bundleSubtotal").innerText=selectedBundle? (selectedBundle.price*bundleQty).toFixed(2):"0";
+  document.getElementById("dataBundleModal").style.display="flex";
+}
+function selectBundle(name, price){ selectedBundle={name,price}; bundleQty=1; document.getElementById("bundleQty").innerText=bundleQty; document.getElementById("bundleSubtotal").innerText=(price*bundleQty).toFixed(2); }
+function addMoreBundle(){ if(!selectedBundle){ alert("Select a package first"); return; } bundleQty++; document.getElementById("bundleQty").innerText=bundleQty; document.getElementById("bundleSubtotal").innerText=(selectedBundle.price*bundleQty).toFixed(2); }
+function closeDataBundleModal(){ document.getElementById("dataBundleModal").style.display="none"; }
+function payBundle(){
+  if(!selectedBundle){ alert("Select a package first"); return; }
+  const amount = selectedBundle.price*bundleQty;
+  let handler = PaystackPop.setup({
+    key: 'pk_live_98575428080557d261e91cb92fe745f878fc4278',
+    email: 'jbellingham771@gmail.com',
+    amount: amount*100,
+    currency: 'GHS',
+    ref: ''+Math.floor(Math.random()*1000000000+1),
+    callback: function(response){
+      cart.push({name:selectedBundle.name,price:selectedBundle.price,qty:bundleQty});
+      let msg=`Hi! I just paid ₵${amount.toFixed(2)} for ${selectedBundle.name} (Quantity: ${bundleQty})`;
+      window.open(`https://wa.me/0548164533?text=${encodeURIComponent(msg)}`,"_blank");
+      selectedBundle=null; bundleQty=1;
+      closeDataBundleModal();
+    },
+    onClose:function(){ alert("Payment cancelled"); }
+  });
+  handler.openIframe();
+}
+function confirmWhatsAppBundle(){
+  if(!selectedBundle){ alert("Please select a data package first"); return; }
+  let amount=selectedBundle.price*bundleQty;
+  let msg=`Hi, I want to purchase ${bundleQty} x ${selectedBundle.name} for ₵${amount.toFixed(2)}`;
+  window.open(`https://wa.me/0548164533?text=${encodeURIComponent(msg)}`,"_blank");
+}
 </script>
+
 </body>
-</html>
+    </html>
