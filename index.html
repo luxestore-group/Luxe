@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Luxe Store</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 
 <style>
 /* CSS STYLES */
@@ -237,6 +237,7 @@ const DEFAULT_USER_EMAIL = 'jbellingham771@gmail.com';
 
 let cart = [];
 let allProductsData = []; 
+let PaystackPop; // Global reference for the loaded Paystack object
 
 // --- CRITICAL: SAFE PAYSTACK LOADER ---
 // This function downloads the script safely only when needed.
@@ -244,16 +245,21 @@ function loadPaystackScript() {
     return new Promise((resolve, reject) => {
         // If already loaded, return it immediately
         if (window.PaystackPop) {
-            console.log("Paystack already loaded.");
-            resolve(window.PaystackPop);
+            PaystackPop = window.PaystackPop;
+            resolve(PaystackPop);
             return;
         }
         console.log("Loading Paystack script...");
         const script = document.createElement('script');
         script.src = 'https://js.paystack.co/v1/inline.js';
         script.onload = () => {
-            console.log("Paystack script loaded successfully.");
-            resolve(window.PaystackPop);
+            if (window.PaystackPop) {
+                PaystackPop = window.PaystackPop;
+                console.log("Paystack script loaded successfully.");
+                resolve(PaystackPop);
+            } else {
+                reject(new Error('Paystack script loaded but PaystackPop object not found.'));
+            }
         };
         script.onerror = () => {
             console.error("Failed to load Paystack script.");
@@ -268,10 +274,11 @@ function loadPaystackScript() {
 let app, db, auth;
 let firebaseInitialized = false;
 
-(async () => {
+// Async function to handle Firebase imports and authentication
+async function initializeFirebase() {
     try {
         const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
-        const { getFirestore, collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        const { getFirestore } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
         const { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"); 
 
         const firebaseConfig = {
@@ -332,17 +339,22 @@ let firebaseInitialized = false;
             catch (e) { console.error(e); }
         };
         
-        initializeDOMHandlers(true);
-
+        return true; // Success
     } catch (error) {
         console.error("CRITICAL: Firebase initialization failed.", error);
-        initializeDOMHandlers(false);
+        return false; // Failure
     }
-})();
+}
 
+// Immediately run Firebase initialization
+const authEnabledPromise = initializeFirebase();
 
 // --- DOM HANDLERS ---
-function initializeDOMHandlers(authEnabled) {
+document.addEventListener('DOMContentLoaded', () => {
+    initializeDOMHandlers(authEnabledPromise);
+});
+
+function initializeDOMHandlers(authEnabledPromise) {
     
     // Data Init
     document.querySelectorAll('.card').forEach((card, index) => {
@@ -368,7 +380,7 @@ function initializeDOMHandlers(authEnabled) {
     document.getElementById('themeBtn_menu').onclick = () => { document.body.classList.toggle('dark'); };
     document.getElementById('notifyBtn_menu').onclick = () => { document.getElementById('noticeModal').classList.add('show'); toggleMenu(); };
     document.getElementById('supportBtn_menu').onclick = () => { 
-        window.open(`https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=Hello Support`, '_blank'); toggleMenu(); 
+        window.open(`https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=Hello Luxe Store Customer Service, I need assistance.`, '_blank'); toggleMenu(); 
     };
 
     // Close Modals
@@ -392,7 +404,7 @@ function initializeDOMHandlers(authEnabled) {
       cartTotal.textContent=total;
     }
 
-    // Image Viewer
+    // Image Viewer (Keep it brief)
     const imageViewerModal = document.getElementById('imageViewerModal');
     const largeProductImage = document.getElementById('largeProductImage');
     const viewerPrev = document.getElementById('viewerPrev');
@@ -402,7 +414,6 @@ function initializeDOMHandlers(authEnabled) {
     function updateImageViewer() {
         largeProductImage.src = currentViewerImages[currentViewerIndex];
         largeProductImage.classList.remove('zoomed'); 
-        document.getElementById('imageViewerContent').scrollTo(0, 0); 
         viewerPrev.style.display = currentViewerImages.length > 1 ? 'block' : 'none';
         viewerNext.style.display = currentViewerImages.length > 1 ? 'block' : 'none';
     }
@@ -446,65 +457,86 @@ function initializeDOMHandlers(authEnabled) {
       return `${type}-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.floor(Math.random()*900+100)}`;
     }
 
-    // === PAYMENT HANDLER WITH SAFE LOADER ===
-    async function handlePayment(email, amount, orderId, metadata, onSuccessCallback) {
-        // 1. Force load script
-        let paystackPop;
-        try {
-            paystackPop = await loadPaystackScript();
-        } catch (error) {
-            alert(error.message); // Alert the user about network error
-            return;
-        }
+    // === CORE PAYMENT HANDLER ===
+    async function handlePayment(email, amount, orderId, metadata, onSuccessCallback, btn) {
+        
+        let originalText = btn.textContent;
+        btn.textContent = "Processing...";
+        btn.disabled = true;
 
-        // 2. Setup Handler (Safe access)
-        const handler = paystackPop.setup({
-            key: PAYSTACK_PUBLIC_KEY,
-            email: email,
-            amount: amount * 100, // Convert to kobo
-            currency: 'GHS',
-            ref: orderId,
-            metadata: metadata,
-            callback: onSuccessCallback,
-            onClose: () => alert('Payment cancelled.'),
-            onError: (err) => alert('Paystack Error: ' + JSON.stringify(err))
-        });
-        handler.openIframe();
+        try {
+            // 1. Force load Paystack script
+            const paystackPop = await loadPaystackScript();
+
+            // 2. Setup Handler
+            const handler = paystackPop.setup({
+                key: PAYSTACK_PUBLIC_KEY,
+                email: email,
+                amount: amount * 100, // Convert to kobo/pesewas
+                currency: 'GHS',
+                ref: orderId,
+                metadata: metadata,
+                callback: onSuccessCallback,
+                onClose: () => {
+                    alert('Payment cancelled or closed.');
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                },
+                onError: (err) => {
+                    console.error("Paystack Error:", err);
+                    alert('Payment Initialization Failed. Check browser console for details.');
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            });
+            
+            // 3. Open Iframe
+            handler.openIframe(); 
+            // The button state will be reset by the callback/onClose handlers once the iframe session ends.
+
+        } catch (error) {
+            console.error("Payment setup error:", error);
+            alert(`Payment setup failed: ${error.message}. Please check console.`);
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
     }
 
 
-    // === CHECKOUT BUTTON ===
+    // === CHECKOUT BUTTON (CART) ===
     document.getElementById('checkoutBtn').onclick = async function() {
-      const btn = this;
-      if(!authEnabled || !auth.currentUser){ alert('Please Sign In first.'); return; } 
-      if(cart.length===0){alert('Cart empty!'); return;}
-      
-      const name=document.getElementById('custName').value.trim();
-      const phone=document.getElementById('custPhone').value.trim();
-      const email=document.getElementById('custEmail').value.trim();
-      const total=Number(cartTotal.textContent);
-      
-      if(!name||!phone||!email){alert('Please fill all details.'); return;}
+        const btn = this;
+        const authEnabled = await authEnabledPromise;
 
-      btn.textContent = "Processing..."; btn.disabled = true;
-      const orderId = generateOrderId("ORD");
-      const userId = auth.currentUser.uid;
+        if(!authEnabled || !auth || !auth.currentUser){ alert('Please Sign In first.'); return; } 
+        if(cart.length===0){alert('Cart empty!'); return;}
+        
+        const name=document.getElementById('custName').value.trim();
+        const phone=document.getElementById('custPhone').value.trim();
+        const email=document.getElementById('custEmail').value.trim();
+        const total=Number(cartTotal.textContent);
+        
+        if(!name||!phone||!email){alert('Please fill all details.'); return;}
 
-      await handlePayment(email, total, orderId, {}, async (res) => {
-          // Success
-          try {
-            const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-            await addDoc(collection(db,'orders'),{
-                orderId, userId, customerName:name, customerPhone:phone, customerEmail:email,
-                items:cart, totalAmount:total, status:'Paid', reference:res.reference, timestamp:serverTimestamp()
-            });
-            alert('Payment successful! Order ID: '+orderId);
-            cart=[]; renderCart(); document.getElementById('cartModal').classList.remove('show');
-          } catch(e) { console.error(e); alert('Payment successful but db log failed.'); }
-          finally { btn.textContent = "Checkout & Pay"; btn.disabled = false; }
-      });
-      // If window closed without payment, reset button
-      setTimeout(() => { btn.textContent = "Checkout & Pay"; btn.disabled = false; }, 5000);
+        const orderId = generateOrderId("ORD");
+        const userId = auth.currentUser.uid;
+
+        await handlePayment(email, total, orderId, {}, async (res) => {
+            // Success Callback
+            try {
+                const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+                await addDoc(collection(db,'orders'),{
+                    orderId, userId, customerName:name, customerPhone:phone, customerEmail:email,
+                    items:cart, totalAmount:total, status:'Paid', reference:res.reference, timestamp:serverTimestamp()
+                });
+                alert('Payment successful! Order ID: '+orderId);
+                cart=[]; renderCart(); document.getElementById('cartModal').classList.remove('show');
+            } catch(e) { console.error(e); alert('Payment successful but order logging failed. Contact support with Paystack Ref: '+res.reference); }
+            finally { 
+                btn.textContent = "Checkout & Pay"; 
+                btn.disabled = false; 
+            }
+        }, btn);
     };
 
     // === MTN BUNDLES ===
@@ -521,46 +553,66 @@ function initializeDOMHandlers(authEnabled) {
     document.getElementById('mtnOpenBtn').onclick=()=>document.getElementById('mtnModal').classList.add('show');
 
     document.getElementById('mtnPay').onclick = async function() {
-      const btn = this;
-      if(!authEnabled || !auth.currentUser){ alert('Please Sign In first.'); return; } 
-      const number=document.getElementById('mtnNumber').value.trim();
-      const name=document.getElementById('mtnName').value.trim();
-      const email=document.getElementById('mtnEmail').value.trim();
-      
-      if(!number||!name||!email){alert('Please fill all details.'); return;}
-      if(number.length !== 10){alert('Invalid MTN number.'); return;}
+        const btn = this;
+        const authEnabled = await authEnabledPromise;
 
-      btn.textContent = "Processing..."; btn.disabled = true;
-      const orderId = generateOrderId("MTN");
-      const userId = auth.currentUser.uid;
+        if(!authEnabled || !auth || !auth.currentUser){ alert('Please Sign In first.'); return; } 
+        const number=document.getElementById('mtnNumber').value.trim();
+        const name=document.getElementById('mtnName').value.trim();
+        const email=document.getElementById('mtnEmail').value.trim();
+        
+        if(!number||!name||!email){alert('Please fill all details.'); return;}
+        if(number.length !== 10){alert('Invalid 10-digit MTN number (e.g., 054xxxxxxx).'); return;}
 
-      await handlePayment(email, selectedMTNPrice, orderId, {
-          custom_fields: [{display_name:'MTN Number', variable_name:'mtn_number', value:number}]
-      }, async (res) => {
-          try {
-              const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-              await addDoc(collection(db,'mtn_orders'),{
-                  orderId, userId, customerName:name, customerPhone:number, customerEmail:email,
-                  bundle:selectedMTNBundle, amount:selectedMTNPrice, status:'Paid', reference:res.reference, timestamp:serverTimestamp()
-              });
-              alert('MTN Bundle Purchased! Order ID: '+orderId);
-              document.getElementById('mtnModal').classList.remove('show');
-          } catch(e) { console.error(e); alert('Payment successful but db log failed.'); }
-          finally { btn.textContent = "Pay for Bundle"; btn.disabled = false; }
-      });
-      setTimeout(() => { btn.textContent = "Pay for Bundle"; btn.disabled = false; }, 5000);
+        const orderId = generateOrderId("MTN");
+        const userId = auth.currentUser.uid;
+
+        await handlePayment(email, selectedMTNPrice, orderId, {
+            custom_fields: [{display_name:'MTN Number', variable_name:'mtn_number', value:number}]
+        }, async (res) => {
+            // Success Callback
+            try {
+                const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+                await addDoc(collection(db,'mtn_orders'),{
+                    orderId, userId, customerName:name, customerPhone:number, customerEmail:email,
+                    bundle:selectedMTNBundle, amount:selectedMTNPrice, status:'Paid', reference:res.reference, timestamp:serverTimestamp()
+                });
+                alert('MTN Bundle Purchased! Order ID: '+orderId);
+                document.getElementById('mtnModal').classList.remove('show');
+            } catch(e) { console.error(e); alert('Payment successful but order logging failed. Contact support with Paystack Ref: '+res.reference); }
+            finally { 
+                btn.textContent = "Pay for Bundle"; 
+                btn.disabled = false; 
+            }
+        }, btn);
     };
     
     // WhatsApp Order Handler
     const orderBtnHandler = document.createElement('button');
     orderBtnHandler.id = 'orderBtn_handler'; orderBtnHandler.style.display = 'none';
     document.body.appendChild(orderBtnHandler);
-    orderBtnHandler.onclick=()=>{
-        if(!authEnabled || !auth.currentUser){ alert('Please Sign In first.'); return; }
+    orderBtnHandler.onclick = async () => {
+        const authEnabled = await authEnabledPromise;
+        if(!authEnabled || !auth || !auth.currentUser){ alert('Please Sign In first.'); return; }
         if(cart.length===0){alert('Cart empty!'); return;}
-        let msg = `New Order Request:\nEmail: ${auth.currentUser.email}\n`;
-        cart.forEach(i=> msg += `${i.name} (x${i.qty})\n`);
-        window.open(`https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+        
+        let total = 0;
+        let itemsList = '';
+        cart.forEach((i, index)=>{
+          const subtotal = i.price * i.qty;
+          itemsList += `\n*${index + 1}.* ${i.name} (x${i.qty} @ ₵${i.price} = ₵${subtotal})`;
+          total += subtotal;
+        });
+
+        let message=`Hello Luxe Store! I am confirming my order details for manual processing.\n\n*Account Email:* ${auth.currentUser.email}\n\n*--- ORDER SUMMARY ---*${itemsList}\n\n*GRAND TOTAL: ₵${total}*\n\n*--- CUSTOMER & DELIVERY DETAILS ---*
+Please use the following information for my delivery:
+\n\u2022 *Full Name:* [ENTER YOUR FULL NAME]
+\n\u2022 *Phone Number:* [ENTER YOUR ACTIVE PHONE NUMBER]
+\n\u2022 *Delivery Location:* [ENTER YOUR TOWN, STREET NAME, AND NEAREST LANDMARK]
+\n\nPlease reply to confirm the order and delivery charge. Thank you!`;
+        
+        const whatsappUrl = `https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=${encodeURIComponent(message)}`; 
+        window.open(whatsappUrl, '_blank');
     };
 }
 </script>
