@@ -24,9 +24,7 @@ body.dark header{background:linear-gradient(90deg,#444,#666,#999)}
     margin-right: 10px;
 }
 .header-content { flex-grow: 1; text-align: center; display: flex; align-items: center; justify-content: center; flex-direction: column;} 
-.header-content h1 { margin: 0; }
-/* 2. APPLY STYLISH FONT TO H1 AND WELCOME MESSAGE */
-h1{
+.header-content h1{
     font-size:1.8rem;
     font-family: 'Playfair Display', serif; /* Apply stylish font */
     font-weight: 700;
@@ -179,9 +177,9 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
     display: flex;
     flex-direction: column;
     gap: 15px;
-    box-sizing: border-box; /* FIX 1: Ensures padding is included in the 250px width */
-    border-top-right-radius: 14px; /* Curve the vertices of the side menu */
-    border-bottom-right-radius: 14px; /* Curve the vertices of the side menu */
+    box-sizing: border-box; 
+    border-top-right-radius: 14px; 
+    border-bottom-right-radius: 14px; 
 }
 body.dark #sideMenu { background: #222; color: #fff; }
 #sideMenu.open { transform: translateX(0); }
@@ -192,8 +190,8 @@ body.dark #sideMenu { background: #222; color: #fff; }
     font-weight: bold;
     cursor: pointer;
     text-align: left;
-    width: 100%; /* FIX 2: Ensures button fills the width of the content area */
-    box-sizing: border-box; /* FIX 3: Ensures button padding is inside its 100% width */
+    width: 100%; 
+    box-sizing: border-box; 
     background: var(--silver); 
     color: #333;
 }
@@ -236,7 +234,8 @@ body.dark #sideMenu #supportBtn_menu { background: #444; color: #fff; }
         <h1>Luxe Store</h1>
         <p class="welcome-message">Welcome to the new world, Dear!</p>
     </div>
-    <div style="width: 24px; margin-right: 15px;"></div> </header>
+    <div style="width: 24px; margin-right: 15px;"></div> 
+</header>
 
 <div class="products">
 <div class="card" data-name="Silver Crest Blender 2in1 2.0L" data-price="300" data-images="images/blender.jpg,images/blenders.jpg,images/blender2.jpg" data-description="Powerful 2.0L blender with stainless steel blades. Crushes ice, blends smoothies, and grinds spices effortlessly with its versatile 2-in-1 design.">
@@ -405,9 +404,7 @@ const db = getFirestore(app);
 const auth = getAuth(app); 
 
 // === 2. PAYSTACK CONFIGURATION ===
-// Public Key verified: pk_live_98575428080557d261e91cb92fe745f878fc4278
 const PAYSTACK_PUBLIC_KEY = 'pk_live_98575428080557d261e91cb92fe745f878fc4278';
-// Customer service number in international format
 const CUSTOMER_SERVICE_NUMBER = '233548164533'; 
 
 let cart = [];
@@ -685,15 +682,17 @@ function generateOrderId(type="ORD"){
 // Paystack checkout (normal)
 document.getElementById('checkoutBtn').onclick=()=>{
   if(!auth.currentUser){ alert('Please Sign In or Sign Up before checking out.'); return; } 
-  if(cart.length===0){alert('Cart empty'); return;}
+  if(cart.length===0){alert('Cart empty! Please add items before checking out.'); return;}
+  
   const name=document.getElementById('custName').value.trim();
   const phone=document.getElementById('custPhone').value.trim();
   const email=document.getElementById('custEmail').value.trim();
-  
-  // Enforce required fields for Paystack
-  if(!name||!phone||!email){alert('Fill in your Name, Phone number, and Email before proceeding to payment.'); return;}
-  
   const total=Number(cartTotal.textContent);
+  
+  // Explicit Validation Check (Enhanced)
+  if(!name||!phone||!email){alert('Fill in your Name, Phone number, and Email before proceeding to payment.'); return;}
+  if(total<=0){alert('The cart total must be greater than zero to proceed to payment.'); return;}
+
   const orderId=generateOrderId("ORD");
   const userId = auth.currentUser.uid; 
 
@@ -711,7 +710,12 @@ document.getElementById('checkoutBtn').onclick=()=>{
       cart=[]; renderCart(); document.getElementById('cartModal').classList.remove('show');
       document.getElementById('custName').value=''; document.getElementById('custPhone').value=''; document.getElementById('custEmail').value=auth.currentUser.email; 
     },
-    onClose:()=>alert('Payment cancelled')
+    // Add Paystack Error Feedback
+    onClose:()=>alert('Payment cancelled or closed.'),
+    onError: (error) => {
+        console.error("Paystack Error:", error);
+        alert(`Payment Initialization Failed. Please check the console for details, or check for pop-up blockers. Error: ${error.message || error}`);
+    }
   });
   handler.openIframe();
 };
@@ -735,9 +739,10 @@ document.getElementById('mtnPay').onclick=()=>{
   const name=document.getElementById('mtnName').value.trim();
   const email=document.getElementById('mtnEmail').value.trim();
   
-  // Enforce required fields for MTN Paystack
+  // Explicit Validation Check (Enhanced)
   if(!number||!name||!email){alert('Fill in the MTN Number, your Name, and Email before proceeding to payment.'); return;}
-  
+  if(selectedMTNPrice<=0){alert('Please select a valid bundle amount to proceed to payment.'); return;}
+
   const orderId=generateOrderId("MTN");
   const userId = auth.currentUser.uid; 
 
@@ -756,7 +761,12 @@ document.getElementById('mtnPay').onclick=()=>{
       document.getElementById('mtnModal').classList.remove('show');
       document.getElementById('mtnNumber').value=''; document.getElementById('mtnName').value=''; document.getElementById('mtnEmail').value=auth.currentUser.email; 
     },
-    onClose:()=>alert('Payment cancelled')
+    // Add Paystack Error Feedback
+    onClose:()=>alert('Payment cancelled or closed.'),
+    onError: (error) => {
+        console.error("Paystack Error:", error);
+        alert(`Payment Initialization Failed. Please check the console for details, or check for pop-up blockers. Error: ${error.message || error}`);
+    }
   });
   handler.openIframe();
 };
