@@ -458,12 +458,20 @@ function initializeDOMHandlers(firebaseModulesPromise) {
       return `${type}-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.floor(Math.random()*900+100)}`;
     }
 
-    // === CORE PAYMENT HANDLER - CRITICAL FIXES HERE ===
+    // === CORE PAYMENT HANDLER - CRITICAL FIX APPLIED HERE ===
     async function handlePayment(email, amount, orderId, metadata, onSuccessCallback, btn) {
         
         const originalText = btn.textContent;
         btn.textContent = "Processing...";
         btn.disabled = true;
+
+        if (typeof onSuccessCallback !== 'function') {
+            console.error("Critical: onSuccessCallback is not a function!", onSuccessCallback);
+            alert("Internal Error: Payment setup failed because the success function is missing. Try again after re-loading the page.");
+            btn.textContent = originalText;
+            btn.disabled = false;
+            return;
+        }
 
         try {
             // 1. Force load Paystack script
@@ -477,7 +485,11 @@ function initializeDOMHandlers(firebaseModulesPromise) {
                 currency: 'GHS',
                 ref: orderId,
                 metadata: metadata,
-                callback: onSuccessCallback,
+                // CRITICAL FIX: Ensure Paystack receives a non-async function reference directly
+                callback: (response) => { 
+                    console.log("Paystack success response received. Executing custom callback.");
+                    onSuccessCallback(response); 
+                },
                 onClose: () => {
                     console.log('Payment window closed by user.');
                     btn.textContent = originalText;
@@ -491,7 +503,7 @@ function initializeDOMHandlers(firebaseModulesPromise) {
                 }
             });
             
-            // 3. Open Iframe - THE FINAL STEP
+            // 3. Open Iframe
             handler.openIframe(); 
 
         } catch (error) {
@@ -521,8 +533,8 @@ function initializeDOMHandlers(firebaseModulesPromise) {
         const orderId = generateOrderId("ORD");
         const userId = modules.auth.currentUser.uid;
 
-        await handlePayment(email, total, orderId, {}, async (res) => {
-            // Success Callback
+        // The success logic as a separate async function
+        const successHandler = async (res) => {
             try {
                 await modules.addDoc(modules.collection(modules.db,'orders'),{
                     orderId, userId, customerName:name, customerPhone:phone, customerEmail:email,
@@ -532,10 +544,13 @@ function initializeDOMHandlers(firebaseModulesPromise) {
                 cart=[]; renderCart(); document.getElementById('cartModal').classList.remove('show');
             } catch(e) { console.error(e); alert('Payment successful but order logging failed. Contact support with Paystack Ref: '+res.reference); }
             finally { 
-                btn.textContent = "Checkout & Pay"; 
-                btn.disabled = false; 
+                // Note: The button state is reset by the Paystack onClose/onError functions
+                // We keep this block for robustness but the button reset happens in Paystack's handler
             }
-        }, btn);
+        };
+
+        // Call handlePayment with the non-async success handler
+        await handlePayment(email, total, orderId, {}, successHandler, btn);
     };
 
     // === MTN BUNDLES ===
@@ -566,10 +581,8 @@ function initializeDOMHandlers(firebaseModulesPromise) {
         const orderId = generateOrderId("MTN");
         const userId = modules.auth.currentUser.uid;
 
-        await handlePayment(email, selectedMTNPrice, orderId, {
-            custom_fields: [{display_name:'MTN Number', variable_name:'mtn_number', value:number}]
-        }, async (res) => {
-            // Success Callback
+        // The success logic as a separate async function
+        const successHandler = async (res) => {
             try {
                 await modules.addDoc(modules.collection(modules.db,'mtn_orders'),{
                     orderId, userId, customerName:name, customerPhone:number, customerEmail:email,
@@ -579,10 +592,13 @@ function initializeDOMHandlers(firebaseModulesPromise) {
                 document.getElementById('mtnModal').classList.remove('show');
             } catch(e) { console.error(e); alert('Payment successful but order logging failed. Contact support with Paystack Ref: '+res.reference); }
             finally { 
-                btn.textContent = "Pay for Bundle"; 
-                btn.disabled = false; 
+                // Note: The button state is reset by the Paystack onClose/onError functions
             }
-        }, btn);
+        };
+
+        await handlePayment(email, selectedMTNPrice, orderId, {
+            custom_fields: [{display_name:'MTN Number', variable_name:'mtn_number', value:number}]
+        }, successHandler, btn);
     };
     
     // WhatsApp Order Handler (Unchanged)
