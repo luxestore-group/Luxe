@@ -91,6 +91,7 @@ body.dark #sideMenu #supportBtn_menu { background: #444; color: #fff; }
     <button id="themeBtn_menu">Light / Dark</button>
     <button id="notifyBtn_menu">🔔 Notice</button>
     <button id="supportBtn_menu">📞 Customer Service</button> 
+    <button id="whatsappGroupBtn_menu" style="background: #25d366; color: white;">👥 WhatsApp Group</button>
     <button id="logoutBtn_menu" style="display: none;">Log Out</button>
 </div>
 <div id="menuOverlay"></div>
@@ -234,6 +235,7 @@ body.dark #sideMenu #supportBtn_menu { background: #444; color: #fff; }
 const PAYSTACK_PUBLIC_KEY = 'pk_live_98575428080557d261e91cb92fe745f878fc4278';
 const CUSTOMER_SERVICE_NUMBER = '233548164533'; 
 const DEFAULT_USER_EMAIL = 'jbellingham771@gmail.com'; 
+const WHATSAPP_GROUP_LINK = 'https://chat.whatsapp.com/GxS4tPlo8sqH8xkbARNvPc'; // ADDED CONST
 
 let cart = [];
 let allProductsData = []; 
@@ -286,7 +288,7 @@ async function initializeFirebase() {
           projectId: "luxe-datastore",
           storageBucket: "luxe-datastore.firebasestorage.app",
           messagingSenderId: "337992102686",
-          appId: "1:337992102686:web:791d86196df28baf8b4f0f"
+          appId: "1:337992102686:web:791d86196df28baf4f0f"
         };
 
         app = initializeApp(firebaseConfig);
@@ -367,7 +369,7 @@ function initializeDOMHandlers(firebaseModulesPromise) {
         });
     });
 
-    // Menu Handlers (Unchanged)
+    // Menu Handlers (Modified to include WhatsApp Group)
     const sideMenu = document.getElementById('sideMenu');
     const menuOverlay = document.getElementById('menuOverlay');
     const toggleMenu = () => {
@@ -383,6 +385,12 @@ function initializeDOMHandlers(firebaseModulesPromise) {
     document.getElementById('supportBtn_menu').onclick = () => { 
         window.open(`https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=Hello Luxe Store Customer Service, I need assistance.`, '_blank'); toggleMenu(); 
     };
+    // START OF ADDED CODE
+    document.getElementById('whatsappGroupBtn_menu').onclick = () => { 
+        window.open(WHATSAPP_GROUP_LINK, '_blank'); 
+        toggleMenu(); 
+    };
+    // END OF ADDED CODE
 
     // Close Modals (Unchanged)
     document.querySelectorAll('.close, #viewerClose').forEach(c => c.onclick = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')));
