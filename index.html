@@ -6,69 +6,213 @@
 <title>Luxe Store</title>
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <style>
+/* --- EXISTING CSS --- */
 :root{--gold:#b8860b;--silver:#c0c0c0}
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif;}
 body{background:#fff8f0;color:#333;transition:.3s}
 body.dark{background:#111;color:#fff}
-header{background:linear-gradient(90deg,var(--gold),#fff,var(--silver));padding:14px;text-align:center;position:sticky;top:0;z-index:50}
+header{background:linear-gradient(90deg,var(--gold),#fff,var(--silver));padding:14px;text-align:center;position:sticky;top:0;z-index:50; display: flex; justify-content: space-between; align-items: center; flex-direction: row;}
 body.dark header{background:linear-gradient(90deg,#444,#666,#999)}
-h1{margin:0;font-size:1.8rem}
-.header-actions{display:flex;justify-content:center;gap:10px;margin-top:8px}
-.header-actions button{padding:6px 10px;border-radius:20px;border:none;font-weight:bold;cursor:pointer}
+.header-content { flex-grow: 1; text-align: center; } 
+h1{margin:0;font-size:1.8rem;}
+.welcome-message { font-size: 0.9rem; margin-top: 4px; color: #555; }
+body.dark .welcome-message { color: #ccc; }
 
 .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:16px}
 .card{background:#fff;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.2);overflow:hidden;transition:.3s}
 body.dark .card{background:#222}
-.card img{width:100%;height:180px;object-fit:cover}
+.card img{width:100%;height:180px;object-fit:cover; cursor: pointer;} /* Make product image clickable */
 .card-body{text-align:center;padding:10px}
 .price{font-weight:bold;color:var(--silver)}
 .buttons{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .buttons button{flex:1 1 45%;padding:8px;border:none;border-radius:10px;font-weight:bold;cursor:pointer}
 .buy{background:var(--gold);color:#fff}
 .details{background:#c0c0c0}
-
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);align-items:center;justify-content:center;z-index:1000}
 .modal.show{display:flex}
 .modal-box{background:#fff;color:#000;padding:16px;border-radius:14px;max-width:560px;width:95%;max-height:90vh;overflow:auto;position:relative}
 body.dark .modal-box{background:#222;color:#fff}
 .close{position:absolute;right:12px;top:8px;font-size:20px;cursor:pointer}
 
-.gallery{display:flex;gap:8px;overflow-x:auto;margin:8px 0}
-.gallery img{width:150px;height:150px;object-fit:cover;border-radius:10px;cursor:zoom-in;transition:.3s}
-.gallery img.zoom{transform:scale(2);cursor:zoom-out}
+/* --- IMAGE VIEWER MODAL STYLES --- */
+#imageViewerModal .modal-box {
+    max-width: 95%;
+    width: 95%;
+    height: 95vh;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#imageViewerContent {
+    position: relative;
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; 
+}
+#largeProductImage {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    transition: transform 0.3s ease-in-out;
+    cursor: zoom-in;
+    transform-origin: center center;
+}
+#largeProductImage.zoomed {
+    transform: scale(2); 
+    cursor: zoom-out;
+    max-width: none; 
+}
+.viewer-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 28px;
+    z-index: 10;
+    transition: background 0.3s;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    line-height: 28px;
+    text-align: center;
+}
+.viewer-nav:hover { background: rgba(0,0,0,0.8); }
+#viewerPrev { left: 10px; }
+#viewerNext { right: 10px; }
+#viewerClose {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 100;
+}
+#imageViewerModal.show #imageViewerContent {
+    overflow: auto; 
+}
 
+/* Details Modal changes for text only */
+#detailsModal .modal-box {
+    max-width: 400px;
+    height: auto;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+}
+#detailsModal p {
+    margin-bottom: 15px;
+}
+
+
+/* --- OTHER MODAL STYLES --- */
 .cart-item{display:flex;justify-content:space-between;align-items:center;margin:6px 0}
 .cart-item button{padding:4px 8px}
-
 .notice{font-size:.9rem;line-height:1.4}
 .notice ul{padding-left:18px}
 .notice li{margin-bottom:6px}
-
-.pay{background:var(--gold);color:#fff;padding:10px;border:none;border-radius:10px;width:100%;font-weight:bold}
+.pay{background:var(--gold);color:#fff;padding:10px;border:none;border-radius:10px;width:100%;font-weight:bold;cursor:pointer}
 input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px solid #ccc}
-
 .mtn-card img{background:#ffd700;padding:14px;object-fit:contain}
-
 .mtn-bundles{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;margin-top:10px}
 .mtn-bundles button{padding:8px;border:none;border-radius:10px;background:var(--gold);color:#fff;cursor:pointer}
 .mtn-bundles button.selected{background:#ff9900;color:#000;font-weight:bold}
+
+
+/* --- CSS for Side Menu (FIXED) --- */
+#menuBtn { background: none; border: none; font-size: 24px; cursor: pointer; padding: 0; margin-right: 15px; }
+#sideMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px; 
+    height: 100%;
+    background: #fff;
+    color: #333;
+    z-index: 2000;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-sizing: border-box; /* FIX 1: Ensures padding is included in the 250px width */
+}
+body.dark #sideMenu { background: #222; color: #fff; }
+#sideMenu.open { transform: translateX(0); }
+#sideMenu button {
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: left;
+    width: 100%; /* FIX 2: Ensures button fills the width of the content area */
+    box-sizing: border-box; /* FIX 3: Ensures button padding is inside its 100% width */
+    background: var(--silver); 
+    color: #333;
+}
+body.dark #sideMenu button { background: #444; color: #fff; }
+#sideMenu #cartBtn_menu, #sideMenu #orderBtn_menu, #sideMenu #logoutBtn_menu { background: var(--gold); color: #fff; }
+#sideMenu #supportBtn_menu { background: #c0c0c0; color: #333; }
+body.dark #sideMenu #supportBtn_menu { background: #444; color: #fff; }
+#menuOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1999; cursor: pointer; }
 </style>
 </head>
 <body>
-<header>
-<h1>Luxe Store</h1>
-<div class="header-actions">
-<button id="cartBtn">🛒 Cart</button>
-<button id="orderBtn">💬 Confirm Order</button>
-<button id="themeBtn">Light / Dark</button>
-<button id="notifyBtn">🔔 Notice</button>
+
+<div class="modal show" id="authModal">
+  <div class="modal-box" style="text-align: center; max-width: 400px;">
+    <h2>Welcome to Luxe Store</h2>
+    <p>Please Sign In or Sign Up to access the store.</p>
+    <input id="authEmail" type="email" placeholder="Email">
+    <input id="authPassword" type="password" placeholder="Password">
+    <button class="pay" id="signInBtn" style="margin-top: 15px;">Sign In</button>
+    <button class="details" id="signUpBtn" style="margin-top: 8px;">Sign Up</button>
+    <p id="authError" style="color: red; margin-top: 10px;"></p>
+  </div>
 </div>
+
+<div id="sideMenu">
+    <h3>Menu</h3>
+    <button id="cartBtn_menu">🛒 Cart</button>
+    <button id="orderBtn_menu">💬 Confirm Order</button>
+    <button id="themeBtn_menu">Light / Dark</button>
+    <button id="notifyBtn_menu">🔔 Notice</button>
+    <button id="supportBtn_menu">📞 Customer Service</button> 
+    <button id="logoutBtn_menu" style="display: none;">Log Out</button>
+</div>
+<div id="menuOverlay"></div>
+
+<header>
+    <button id="menuBtn">☰</button> 
+    <div class="header-content"> 
+        <h1>Luxe Store</h1>
+        <p class="welcome-message">Welcome to our new world, Dear.</p>
+    </div>
 </header>
 
 <div class="products">
-<!-- Blender -->
-<div class="card" data-name="Silver Crest Blender 2in1 2.0L" data-price="300" data-images="images/blender.jpg,images/blenders.jpg,images/blender2.jpg">
-<img src="images/blender.jpg">
+<div class="card" data-name="Silver Crest Blender 2in1 2.0L" data-price="300" data-images="images/blender.jpg,images/blenders.jpg,images/blender2.jpg" data-description="Powerful 2.0L blender with stainless steel blades. Crushes ice, blends smoothies, and grinds spices effortlessly with its versatile 2-in-1 design.">
+<img src="images/blender.jpg" data-product-index="0">
 <div class="card-body">
 <h3>Silver Crest Blender 2-in1- 2.0L</h3>
 <p class="price">₵300</p>
@@ -79,9 +223,8 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
 </div>
 </div>
 
-<!-- Earphones -->
-<div class="card" data-name="Superbass 2-in-1 Earphones" data-price="65" data-images="images/headphones.jpg,images/headphones1.jpg">
-<img src="images/headphones.jpg">
+<div class="card" data-name="Superbass 2-in-1 Earphones" data-price="65" data-images="images/headphones.jpg,images/headphones1.jpg" data-description="High-fidelity audio with deep bass. These 2-in-1 earphones switch easily between wired audio and a convenient wireless neckband for active use.">
+<img src="images/headphones.jpg" data-product-index="1">
 <div class="card-body">
 <h3>Superbass 2-in-1 Earphones</h3>
 <p class="price">₵65</p>
@@ -92,9 +235,8 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
 </div>
 </div>
 
-<!-- Smartwatch -->
-<div class="card" data-name="Rich Ripple Smart Watch" data-price="200" data-images="images/smartwatch.jpg,images/smartwatch1.jpg">
-<img src="images/smartwatch.jpg">
+<div class="card" data-name="Rich Ripple Smart Watch" data-price="200" data-images="images/smartwatch.jpg,images/smartwatch1.jpg" data-description="Sleek smart watch with a vibrant display. Tracks heart rate, sleep, and steps. Receive smartphone notifications and enjoy long battery life.">
+<img src="images/smartwatch.jpg" data-product-index="2">
 <div class="card-body">
 <h3>Rich Ripple Smart Watch</h3>
 <p class="price">₵200</p>
@@ -105,9 +247,8 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
 </div>
 </div>
 
-<!-- USB Cable -->
-<div class="card" data-name="3-in-1 60W USB Cable" data-price="50" data-images="images/accessories.jpg,images/accessories1.jpg">
-<img src="images/accessories.jpg">
+<div class="card" data-name="3-in-1 60W USB Cable" data-price="50" data-images="images/accessories.jpg,images/accessories1.jpg" data-description="Durable, braided cable with 60W fast charging. Includes USB-C, Micro USB, and Lightning connectors in one tangle-free design.">
+<img src="images/accessories.jpg" data-product-index="3">
 <div class="card-body">
 <h3>3-in-1 60W USB Cable</h3>
 <p class="price">₵50</p>
@@ -118,9 +259,8 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
 </div>
 </div>
 
-<!-- Powerbank -->
-<div class="card" data-name="Oraimo Traveler Powerbank 10000mAh" data-price="200" data-images="images/powerbank.jpg,images/powerbank1.jpg">
-<img src="images/powerbank.jpg">
+<div class="card" data-name="Oraimo Traveler Powerbank 10000mAh" data-price="200" data-images="images/powerbank.jpg,images/powerbank1.jpg" data-description="Compact 10000mAh powerbank that offers multiple full charges. Features dual output and fast-charging technology for on-the-go power.">
+<img src="images/powerbank.jpg" data-product-index="4">
 <div class="card-body">
 <h3>Oraimo Traveler Powerbank 10000mAh</h3>
 <p class="price">₵200</p>
@@ -131,9 +271,8 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
 </div>
 </div>
 
-<!-- MTN Data Bundle -->
-<div class="card mtn-card">
-<img src="images/databundles.jpg">
+<div class="card mtn-card" data-name="MTN Data Bundles" data-price="0" data-images="images/databundles.jpg" data-description="Instant MTN data top-ups (1GB to 10GB). Quick delivery (30 mins - 1 hr). Ensure number is correct; non-refundable for wrong numbers.">
+<img src="images/databundles.jpg" data-product-index="5">
 <div class="card-body">
 <h3>MTN Data Bundles</h3>
 <p class="price">₵5.50 – ₵60.00</p>
@@ -145,8 +284,6 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
 </div>
 </div>
 
-<!-- Modals -->
-<!-- Cart Modal -->
 <div class="modal" id="cartModal">
 <div class="modal-box">
 <span class="close">×</span>
@@ -160,17 +297,27 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
 </div>
 </div>
 
-<!-- Details Modal -->
 <div class="modal" id="detailsModal">
-<div class="modal-box">
-<span class="close">×</span>
-<h3 id="detailsTitle"></h3>
-<div class="gallery" id="detailsGallery"></div>
-<p><strong>Delivery:</strong> 2–3 weeks upon purchase</p>
-</div>
+    <div class="modal-box">
+        <span class="close">×</span>
+        <h3 id="detailsTitle"></h3>
+        <p id="detailsDescription"></p>
+        <p><strong>Delivery:</strong> 2–3 weeks upon purchase</p>
+    </div>
 </div>
 
-<!-- MTN Modal -->
+<div class="modal" id="imageViewerModal">
+    <div class="modal-box">
+        <span id="viewerClose">×</span>
+        <div id="imageViewerContent">
+            <button id="viewerPrev" class="viewer-nav">&#10094;</button>
+            <img id="largeProductImage" src="">
+            <button id="viewerNext" class="viewer-nav">&#10095;</button>
+        </div>
+        <div style="color: white; margin-top: 10px;">Tap or click image to zoom/unzoom.</div>
+    </div>
+</div>
+
 <div class="modal" id="mtnModal">
 <div class="modal-box">
 <span class="close">×</span>
@@ -182,11 +329,11 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
 <button data-price="18">3GB – ₵18</button>
 <button data-price="24">4GB – ₵24</button>
 <button data-price="30">5GB – ₵30</button>
-<button data-price="36">6GB – ₵36</button>
-<button data-price="42">7GB – ₵42</button>
-<button data-price="48">8GB – ₵48</button>
-<button data-price="54">9GB – ₵54</button>
-<button data-price="60">10GB – ₵60</button>
+<button data-price="36">6GB – 36</button>
+<button data-price="42">7GB – 42</button>
+<button data-price="48">8GB – 48</button>
+<button data-price="54">9GB – 54</button>
+<button data-price="60">10GB – 60</button>
 </div>
 <input id="mtnNumber" placeholder="MTN Number (e.g. 054xxxxxxx)">
 <input id="mtnName" placeholder="Your name">
@@ -195,7 +342,6 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
 </div>
 </div>
 
-<!-- Notice Modal -->
 <div class="modal" id="noticeModal">
 <div class="modal-box">
 <span class="close">×</span>
@@ -215,103 +361,319 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"; 
 
+// === 1. FIREBASE CONFIGURATION ===
 const firebaseConfig = {
-  apiKey: "AIzaSyCZdOPS1D0pSW8jYjL1p7Q9JpES06Pc-UE",
-  authDomain: "luxe-5a8e8.firebaseapp.com",
-  projectId: "luxe-5a8e8",
-  storageBucket: "luxe-5a8e8.appspot.com",
-  messagingSenderId: "178257618326",
-  appId: "1:178257618326:web:3c6c26f267dfcf73d3e9b7"
+  apiKey: "AIzaSyA6WtaQD8tqriy9_WIBV3DxV9vcKzvNSdI",
+  authDomain: "luxe-datastore.firebaseapp.com",
+  projectId: "luxe-datastore",
+  storageBucket: "luxe-datastore.firebasestorage.app",
+  messagingSenderId: "337992102686",
+  appId: "1:337992102686:web:791d86196df28baf8b4f0f"
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app); 
 
-// THEME
-document.getElementById('themeBtn').onclick = () => document.body.classList.toggle('dark');
+// === 2. PAYSTACK CONFIGURATION ===
+const PAYSTACK_PUBLIC_KEY = 'pk_live_98575428080557d261e91cb92fe745f878fc4278';
+const CUSTOMER_SERVICE_NUMBER = '233548164533'; 
 
-// CART LOGIC
 let cart = [];
-const cartModal = document.getElementById('cartModal');
-const cartItems = document.getElementById('cartItems');
-const cartTotal = document.getElementById('cartTotal');
+let allProductsData = []; 
 
-document.getElementById('cartBtn').onclick = () => cartModal.classList.add('show');
-document.getElementById('notifyBtn').onclick = () => document.getElementById('noticeModal').classList.add('show');
-document.querySelectorAll('.close').forEach(c => c.onclick = () => document.querySelectorAll('.modal').forEach(m=>m.classList.remove('show')));
+document.addEventListener('DOMContentLoaded',()=>{
+
+// --- DATA INITIALIZATION ---
+document.querySelectorAll('.card').forEach((card, index) => {
+    allProductsData.push({
+        index: index,
+        name: card.dataset.name,
+        images: card.dataset.images.split(',').filter(s => s.trim() !== ''),
+        description: card.dataset.description
+    });
+});
+
+
+// --- MENU LOGIC ---
+const sideMenu = document.getElementById('sideMenu');
+const menuBtn = document.getElementById('menuBtn');
+const menuOverlay = document.getElementById('menuOverlay');
+const logoutBtnMenu = document.getElementById('logoutBtn_menu'); 
+
+function toggleMenu() {
+    sideMenu.classList.toggle('open');
+    menuOverlay.style.display = sideMenu.classList.contains('open') ? 'block' : 'none';
+}
+
+menuBtn.onclick = toggleMenu;
+menuOverlay.onclick = toggleMenu; 
+
+document.getElementById('cartBtn_menu').onclick = () => {
+    document.getElementById('cartModal').classList.add('show');
+    toggleMenu(); 
+};
+document.getElementById('orderBtn_menu').onclick = () => {
+    document.getElementById('orderBtn_handler').click(); 
+    toggleMenu();
+};
+document.getElementById('themeBtn_menu').onclick = () => {
+    document.body.classList.toggle('dark');
+    document.getElementById('themeBtn_menu').textContent = document.body.classList.contains('dark') ? 'Light / Dark' : 'Dark / Light';
+};
+document.getElementById('notifyBtn_menu').onclick = () => {
+    document.getElementById('noticeModal').classList.add('show');
+    toggleMenu();
+};
+document.getElementById('logoutBtn_menu').onclick = async () => {
+    try {
+        await signOut(auth);
+        toggleMenu();
+    } catch (error) {
+        console.error("Logout error:", error);
+    }
+};
+
+document.getElementById('supportBtn_menu').onclick = () => {
+    let message = 'Hello Luxe Store Customer Service, I need assistance with my order/query.';
+    if (auth.currentUser) {
+        message += `\nMy account email is: ${auth.currentUser.email}`;
+    } else {
+        message += `\nI am currently not logged in.`;
+    }
+    if (cart.length > 0) {
+        let total = 0;
+        let itemsList = cart.map(i => `${i.name} x${i.qty}`).join(', ');
+        cart.forEach(i => total += i.price * i.qty);
+        message += `\nMy current cart total is ₵${total} (Items: ${itemsList}).`;
+    }
+
+    const whatsappUrl = `https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=${encodeURIComponent(message)}`; 
+    window.open(whatsappUrl, '_blank');
+    toggleMenu();
+};
+// --- MENU LOGIC END ---
+
+
+// --- AUTHENTICATION LOGIC ---
+const authModal = document.getElementById('authModal');
+const authEmail = document.getElementById('authEmail');
+const authPassword = document.getElementById('authPassword');
+const signInBtn = document.getElementById('signInBtn');
+const signUpBtn = document.getElementById('signUpBtn');
+const authError = document.getElementById('authError');
+
+signUpBtn.onclick = async () => {
+    authError.textContent = '';
+    const email = authEmail.value;
+    const password = authPassword.value;
+    if (!email || password.length < 6) {
+        authError.textContent = 'Email and a password of at least 6 characters are required.';
+        return;
+    }
+    try {
+        await createUserWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+        authError.textContent = error.message.replace('Firebase: Error ', '');
+    }
+};
+
+signInBtn.onclick = async () => {
+    authError.textContent = '';
+    try {
+        await signInWithEmailAndPassword(auth, authEmail.value, authPassword.value);
+    } catch (error) {
+        authError.textContent = 'Sign-in failed. Check email or password.';
+    }
+};
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        authModal.classList.remove('show');
+        logoutBtnMenu.style.display = 'block'; 
+        document.getElementById('custEmail').value = user.email;
+        document.getElementById('mtnEmail').value = user.email;
+    } else {
+        authModal.classList.add('show');
+        logoutBtnMenu.style.display = 'none'; 
+        document.getElementById('custEmail').value = '';
+        document.getElementById('mtnEmail').value = '';
+    }
+});
+
+
+// Close modals
+document.querySelectorAll('.close, #viewerClose').forEach(c => c.onclick = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')));
+
+// Cart logic
+const cartItems=document.getElementById('cartItems');
+const cartTotal=document.getElementById('cartTotal');
 
 function renderCart(){
   cartItems.innerHTML='';
   let total=0;
   cart.forEach((i,idx)=>{
     total+=i.price*i.qty;
-    cartItems.innerHTML+=`<div class='cart-item'>${i.name} x${i.qty} 
-      <button onclick='inc(${idx})'>+</button> 
-      <button onclick='dec(${idx})'>-</button>
-    </div>`;
+    const div=document.createElement('div');
+    div.className='cart-item';
+    div.innerHTML=`${i.name} x${i.qty} `;
+    const plus=document.createElement('button'); plus.textContent='+'; plus.onclick=()=>{i.qty++; renderCart();};
+    const minus=document.createElement('button'); minus.textContent='-'; minus.onclick=()=>{i.qty>1?i.qty--:cart.splice(idx,1); renderCart();};
+    div.appendChild(plus); div.appendChild(minus);
+    cartItems.appendChild(div);
   });
   cartTotal.textContent=total;
 }
-window.inc=i=>{cart[i].qty++;renderCart();}
-window.dec=i=>{cart[i].qty>1?cart[i].qty--:cart.splice(i,1);renderCart();}
 
-// Order ID generator
-function generateOrderId(type="ORD"){
-  const date=new Date();
-  const y=date.getFullYear();
-  const m=String(date.getMonth()+1).padStart(2,'0');
-  const d=String(date.getDate()).padStart(2,'0');
-  const rand=Math.floor(Math.random()*900+100);
-  return `${type}-${y}${m}${d}-${rand}`;
+// --- IMAGE VIEWER LOGIC ---
+const imageViewerModal = document.getElementById('imageViewerModal');
+const largeProductImage = document.getElementById('largeProductImage');
+const viewerPrev = document.getElementById('viewerPrev');
+const viewerNext = document.getElementById('viewerNext');
+let currentViewerImages = [];
+let currentViewerIndex = 0;
+let currentProductIndex = -1; 
+
+function openImageViewer(productIndex) {
+    const product = allProductsData[productIndex];
+    if (!product || product.images.length === 0) return;
+
+    currentViewerImages = product.images;
+    currentViewerIndex = 0;
+    currentProductIndex = productIndex;
+
+    updateImageViewer();
+    imageViewerModal.classList.add('show');
 }
 
-// Add to cart & details
+function updateImageViewer() {
+    largeProductImage.src = currentViewerImages[currentViewerIndex];
+    largeProductImage.classList.remove('zoomed'); 
+    document.getElementById('imageViewerContent').scrollTo(0, 0); 
+
+    viewerPrev.disabled = currentViewerIndex === 0;
+    viewerNext.disabled = currentViewerIndex === currentViewerImages.length - 1;
+
+    viewerPrev.style.display = currentViewerImages.length > 1 ? 'block' : 'none';
+    viewerNext.style.display = currentViewerImages.length > 1 ? 'block' : 'none';
+}
+
+function navigateViewer(direction) {
+    let newIndex = currentViewerIndex + direction;
+    if (newIndex >= 0 && newIndex < currentViewerImages.length) {
+        currentViewerIndex = newIndex;
+        updateImageViewer();
+    }
+}
+
+viewerPrev.onclick = () => navigateViewer(-1);
+viewerNext.onclick = () => navigateViewer(1);
+
+largeProductImage.onclick = (e) => {
+    largeProductImage.classList.toggle('zoomed');
+    const content = document.getElementById('imageViewerContent');
+    content.style.overflow = largeProductImage.classList.contains('zoomed') ? 'scroll' : 'hidden';
+
+    if (largeProductImage.classList.contains('zoomed')) {
+        const rect = largeProductImage.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        content.scrollTo(x * 1.5 - content.clientWidth / 2, y * 1.5 - content.clientHeight / 2);
+    }
+};
+
+
+// Swipe logic
+let touchstartX = 0;
+let touchendX = 0;
+
+document.getElementById('imageViewerContent').addEventListener('touchstart', e => {
+    touchstartX = e.changedTouches[0].screenX;
+    largeProductImage.style.transition = 'none'; 
+});
+
+document.getElementById('imageViewerContent').addEventListener('touchend', e => {
+    touchendX = e.changedTouches[0].screenX;
+    largeProductImage.style.transition = 'transform 0.3s ease-in-out';
+    handleGesture();
+});
+
+function handleGesture() {
+    const swipeThreshold = 50;
+    if (touchendX < touchstartX - swipeThreshold) {
+        navigateViewer(1); 
+    }
+    if (touchendX > touchstartX + swipeThreshold) {
+        navigateViewer(-1); 
+    }
+}
+
+// --- PRODUCT CLICK HANDLERS ---
 document.querySelectorAll('.card').forEach(card=>{
   const name=card.dataset.name;
-  const price=Number(card.dataset.price||0);
-  const images=(card.dataset.images||'').split(',');
-  if(card.querySelector('.buy') && !card.classList.contains('mtn-card')){
-    card.querySelector('.buy').onclick=()=>{cart.push({name,price,qty:1}); renderCart(); cartModal.classList.add('show');}
+  const description = card.dataset.description;
+  const productIndex = Number(card.querySelector('img').dataset.productIndex);
+
+  // 1. Image click opens the viewer
+  card.querySelector('img').addEventListener('click', () => {
+      openImageViewer(productIndex);
+  });
+  
+  if(card.querySelector('.buy')&&!card.classList.contains('mtn-card')){
+    card.querySelector('.buy').addEventListener('click',()=>{
+      let item = cart.find(i => i.name === name);
+      const price=Number(card.dataset.price||0);
+      if (item) {
+        item.qty++;
+      } else {
+        cart.push({name,price,qty:1});
+      }
+      renderCart();
+      document.getElementById('cartModal').classList.add('show');
+    });
   }
+  
+  // 2. Details button opens the text modal
   if(card.querySelector('.details')){
-    card.querySelector('.details').onclick=()=>{
+    card.querySelector('.details').addEventListener('click',()=>{
       document.getElementById('detailsTitle').textContent=name;
-      const g=document.getElementById('detailsGallery'); g.innerHTML='';
-      images.forEach(s=>{const im=document.createElement('img'); im.src=s; im.onclick=()=>im.classList.toggle('zoom'); g.appendChild(im);});
+      document.getElementById('detailsDescription').textContent=description; 
       document.getElementById('detailsModal').classList.add('show');
-    }
+    });
   }
 });
 
-// Paystack checkout for normal products
-document.getElementById('checkoutBtn').onclick=async()=>{
+
+// Order ID generator
+function generateOrderId(type="ORD"){
+  const d=new Date();
+  return `${type}-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.floor(Math.random()*900+100)}`;
+}
+
+// Paystack checkout (normal)
+document.getElementById('checkoutBtn').onclick=()=>{
+  if(!auth.currentUser){ alert('Please Sign In or Sign Up before checking out.'); return; } 
   if(cart.length===0){alert('Cart empty'); return;}
   const name=document.getElementById('custName').value.trim();
   const phone=document.getElementById('custPhone').value.trim();
   const email=document.getElementById('custEmail').value.trim();
-  if(!name || !phone || !email){alert('Fill all info'); return;}
+  if(!name||!phone||!email){alert('Fill all info'); return;}
   const total=Number(cartTotal.textContent);
   const orderId=generateOrderId("ORD");
+  const userId = auth.currentUser.uid; 
 
   const handler=PaystackPop.setup({
-    key:'pk_live_98575428080557d261e91cb92fe745f878fc4278',
-    email:email,
-    amount:total*100,
-    currency:'GHS',
-    callback: async res=>{
+    key:PAYSTACK_PUBLIC_KEY, 
+    email:email, amount:total*100, currency:'GHS',
+    callback:async res=>{
       await addDoc(collection(db,'orders'),{
-        orderId,
-        customerName:name,
-        customerPhone:phone,
-        customerEmail:email,
-        items:cart,
-        totalAmount:total,
-        status:'Pending',
-        reference:res.reference,
-        timestamp:serverTimestamp()
+        orderId, userId, customerName:name, customerPhone:phone, customerEmail:email,
+        items:cart, totalAmount:total, status:'Pending', reference:res.reference, timestamp:serverTimestamp()
       });
       alert('Payment successful! Order ID: '+orderId);
-      cart=[]; renderCart(); cartModal.classList.remove('show');
+      cart=[]; renderCart(); document.getElementById('cartModal').classList.remove('show');
+      document.getElementById('custName').value=''; document.getElementById('custPhone').value=''; document.getElementById('custEmail').value=auth.currentUser.email; 
     },
     onClose:()=>alert('Payment cancelled')
   });
@@ -319,69 +681,69 @@ document.getElementById('checkoutBtn').onclick=async()=>{
 };
 
 // MTN Bundles
-let selectedMTNPrice=5.5;
-let selectedMTNBundle="1GB";
+let selectedMTNPrice=5.5, selectedMTNBundle="1GB";
+document.querySelector('.mtn-bundles button').classList.add('selected');
+
 document.querySelectorAll('.mtn-bundles button').forEach(btn=>{
-  btn.onclick=()=>{
+  btn.addEventListener('click',()=>{
     document.querySelectorAll('.mtn-bundles button').forEach(b=>b.classList.remove('selected'));
     btn.classList.add('selected');
     selectedMTNPrice=Number(btn.dataset.price);
     selectedMTNBundle=btn.textContent.split('–')[0].trim();
-  }
+  });
 });
 document.getElementById('mtnOpenBtn').onclick=()=>document.getElementById('mtnModal').classList.add('show');
-document.getElementById('mtnPay').onclick=async()=>{
+document.getElementById('mtnPay').onclick=()=>{
+  if(!auth.currentUser){ alert('Please Sign In or Sign Up before buying a bundle.'); return; } 
   const number=document.getElementById('mtnNumber').value.trim();
   const name=document.getElementById('mtnName').value.trim();
   const email=document.getElementById('mtnEmail').value.trim();
-  if(!number || !name || !email){alert('Fill all info'); return;}
+  if(!number||!name||!email){alert('Fill all info'); return;}
   const orderId=generateOrderId("MTN");
+  const userId = auth.currentUser.uid; 
+
   const handler=PaystackPop.setup({
-    key:'pk_live_98575428080557d261e91cb92fe745f878fc4278',
-    email:email,
-    amount:selectedMTNPrice*100,
-    currency:'GHS',
+    key:PAYSTACK_PUBLIC_KEY, 
+    email:email, amount:selectedMTNPrice*100, currency:'GHS',
     metadata:{custom_fields:[{display_name:'MTN Number', variable_name:'mtn_number', value:number}]},
     callback:async res=>{
       await addDoc(collection(db,'mtn_orders'),{
-        orderId,
-        customerName:name,
-        customerPhone:number, // FIXED: store MTN number correctly
-        customerEmail:email,
-        bundle:selectedMTNBundle,
-        amount:selectedMTNPrice,
-        status:'Pending',
-        reference:res.reference,
-        timestamp:serverTimestamp()
+        orderId, userId, customerName:name, customerPhone:number, customerEmail:email,
+        bundle:selectedMTNBundle, amount:selectedMTNPrice, status:'Pending', reference:res.reference, timestamp:serverTimestamp()
       });
       alert('MTN payment successful! Order ID: '+orderId);
       document.getElementById('mtnModal').classList.remove('show');
-      document.getElementById('mtnNumber').value='';
-      document.getElementById('mtnName').value='';
-      document.getElementById('mtnEmail').value='';
+      document.getElementById('mtnNumber').value=''; document.getElementById('mtnName').value=''; document.getElementById('mtnEmail').value=auth.currentUser.email; 
     },
     onClose:()=>alert('Payment cancelled')
   });
   handler.openIframe();
 };
 
-// WhatsApp Confirm Order (normal cart + MTN bundle)
-document.getElementById('orderBtn').onclick=()=>{
-  let message='Hello, I would like to confirm my order:\n';
+// WhatsApp Order Handler
+const orderBtnHandler = document.createElement('button');
+orderBtnHandler.id = 'orderBtn_handler';
+orderBtnHandler.style.display = 'none';
+document.body.appendChild(orderBtnHandler);
 
-  // Normal cart
-  cart.forEach(item=>message+=`${item.name} x${item.qty} - ₵${item.price*item.qty}\n`);
-
-  // MTN bundle
-  const mtnNumber=document.getElementById('mtnNumber').value.trim();
-  if(mtnNumber){
-    message+=`MTN Bundle: ${selectedMTNBundle} - ₵${selectedMTNPrice}\nMTN Number: ${mtnNumber}\n`;
-  }
-
-  const total=(cart.reduce((s,i)=>s+i.price*i.qty,0))+(mtnNumber?selectedMTNPrice:0);
-  message+=`Total: ₵${total}`;
-
-  window.open(`https://wa.me/233548164533?text=${encodeURIComponent(message)}`,'_blank');
+orderBtnHandler.onclick=()=>{
+  if(!auth.currentUser){ alert('Please Sign In or Sign Up before confirming an order via WhatsApp.'); return; }
+  if(cart.length===0){alert('Your cart is empty. Please add items before confirming an order.'); return;}
+  
+  let message=`Hello, I would like to place an order from Luxe Store.\n\n*Logged-in Email:* ${auth.currentUser.email}\n\n*My Cart:*\n`;
+  let total = 0;
+  cart.forEach(i=>{
+    message+=`\u2022 ${i.name} x${i.qty} (Total: ₵${i.price*i.qty})\n`;
+    total += i.price * i.qty;
+  });
+  message += `\n*Grand Total: ₵${total}*`;
+  message += '\n\nPlease provide your preferred Name, Phone Number, and Delivery Location for confirmation.';
+  
+  const whatsappUrl = `https://wa.me/23354xxxxxxx?text=${encodeURIComponent(message)}`; 
+  window.open(whatsappUrl, '_blank');
 };
+
+});
 </script>
-</body
+</body>
+</html>
