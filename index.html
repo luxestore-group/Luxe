@@ -1,30 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Luxe Store</title>
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <style>
 :root{--gold:#b8860b;--silver:#c0c0c0}
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#fff8f0;color:#333;transition:.3s}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif;}
+body{background:#fff8f0;color:#333;transition:.3s}
 body.dark{background:#111;color:#fff}
-header{background:linear-gradient(90deg,var(--gold),#fff,var(--silver));padding:14px;text-align:center}
+header{background:linear-gradient(90deg,var(--gold),#fff,var(--silver));padding:14px;text-align:center;position:sticky;top:0;z-index:50}
 body.dark header{background:linear-gradient(90deg,#444,#666,#999)}
-h1{margin:0}
+h1{margin:0;font-size:1.8rem}
 .header-actions{display:flex;justify-content:center;gap:10px;margin-top:8px}
 .header-actions button{padding:6px 10px;border-radius:20px;border:none;font-weight:bold;cursor:pointer}
 
 .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:16px}
-.card{background:#fff;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.2);overflow:hidden}
+.card{background:#fff;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.2);overflow:hidden;transition:.3s}
 body.dark .card{background:#222}
 .card img{width:100%;height:180px;object-fit:cover}
 .card-body{text-align:center;padding:10px}
 .price{font-weight:bold;color:var(--silver)}
-.buttons{display:flex;gap:6px;flex-wrap:wrap}
+.buttons{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .buttons button{flex:1 1 45%;padding:8px;border:none;border-radius:10px;font-weight:bold;cursor:pointer}
 .buy{background:var(--gold);color:#fff}
+.whatsapp{background:#25d366;color:#fff}
 .details{background:#c0c0c0}
 
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);align-items:center;justify-content:center;z-index:1000}
@@ -33,7 +34,7 @@ body.dark .card{background:#222}
 body.dark .modal-box{background:#222;color:#fff}
 .close{position:absolute;right:12px;top:8px;font-size:20px;cursor:pointer}
 
-.gallery{display:flex;gap:8px;overflow-x:auto}
+.gallery{display:flex;gap:8px;overflow-x:auto;margin:8px 0}
 .gallery img{width:150px;height:150px;object-fit:cover;border-radius:10px;cursor:zoom-in;transition:.3s}
 .gallery img.zoom{transform:scale(2);cursor:zoom-out}
 
@@ -46,8 +47,13 @@ body.dark .modal-box{background:#222;color:#fff}
 
 .pay{background:var(--gold);color:#fff;padding:10px;border:none;border-radius:10px;width:100%;font-weight:bold}
 input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px solid #ccc}
+
 .mtn-card img{background:#ffd700;padding:14px;object-fit:contain}
-label{font-weight:bold;margin-top:10px;display:block}
+
+.mtn-bundles{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;margin-top:10px}
+.mtn-bundles button{padding:8px;border:none;border-radius:10px;background:var(--gold);color:#fff;cursor:pointer}
+.mtn-bundles button.selected{background:#ff9900;color:#000;font-weight:bold}
+
 </style>
 </head>
 <body>
@@ -86,14 +92,51 @@ label{font-weight:bold;margin-top:10px;display:block}
     </div>
   </div>
 
-  <!-- MTN DATA BUNDLE CARD -->
+  <div class="card" data-name="Rich Ripple Smart Watch" data-price="200" data-images="images/smartwatch.jpg,images/smartwatch1.jpg">
+    <img src="images/smartwatch.jpg" />
+    <div class="card-body">
+      <h3>Rich Ripple Smart Watch</h3>
+      <p class="price">₵200</p>
+      <div class="buttons">
+        <button class="buy">Add to Cart</button>
+        <button class="details">More Details</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-name="3-in-1 60W USB Cable" data-price="50" data-images="images/accessories.jpg,images/accessories1.jpg">
+    <img src="images/accessories.jpg" />
+    <div class="card-body">
+      <h3>3-in-1 60W USB Cable</h3>
+      <p class="price">₵50</p>
+      <div class="buttons">
+        <button class="buy">Add to Cart</button>
+        <button class="details">More Details</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-name="Oraimo Traveler Powerbank 10000mAh" data-price="200" data-images="images/powerbank.jpg,images/powerbank1.jpg">
+    <img src="images/powerbank.jpg" />
+    <div class="card-body">
+      <h3>Oraimo Traveler Powerbank 10000mAh</h3>
+      <p class="price">₵200</p>
+      <div class="buttons">
+        <button class="buy">Add to Cart</button>
+        <button class="details">More Details</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MTN DATA BUNDLE -->
   <div class="card mtn-card">
     <img src="images/databundles.jpg" />
     <div class="card-body">
       <h3>MTN Data Bundles</h3>
       <p class="price">₵5.50 – ₵60.00</p>
       <div class="buttons">
-        <button class="buy" onclick="openMTNModal()">Select Bundle</button>
+        <button class="buy" onclick="openMTN()">Buy Bundle</button>
+        <button class="details" onclick="openMTNDetails()">More Details</button>
       </div>
     </div>
   </div>
@@ -108,31 +151,47 @@ label{font-weight:bold;margin-top:10px;display:block}
     <p><strong>Total:</strong> ₵<span id="cartTotal">0</span></p>
     <input id="custName" placeholder="Your name" required />
     <input id="custPhone" placeholder="Phone number" required />
-    <input id="custEmail" placeholder="Email" />
     <button class="pay" id="checkoutBtn">Checkout & Pay</button>
   </div>
 </div>
 
-<!-- MTN BUNDLE MODAL -->
+<!-- DETAILS MODAL -->
+<div class="modal" id="detailsModal">
+  <div class="modal-box">
+    <span class="close">×</span>
+    <h3 id="detailsTitle"></h3>
+    <div class="gallery" id="detailsGallery"></div>
+    <p><strong>Delivery:</strong> 2–3 weeks upon purchase</p>
+    <p><strong>More info:</strong></p>
+    <p><!-- Product info goes here --></p>
+  </div>
+</div>
+
+<!-- MTN MODAL -->
 <div class="modal" id="mtnModal">
   <div class="modal-box">
     <span class="close">×</span>
-    <h3>Select MTN Data Bundle</h3>
-    <label>Choose Bundle</label>
-    <select id="mtnBundleSelect">
-      <option value="5.5">1GB – ₵5.50</option>
-      <option value="12">2GB – ₵12</option>
-      <option value="18">3GB – ₵18</option>
-      <option value="24">4GB – ₵24</option>
-      <option value="30">5GB – ₵30</option>
-      <option value="36">6GB – ₵36</option>
-      <option value="42">7GB – ₵42</option>
-      <option value="48">8GB – ₵48</option>
-      <option value="54">9GB – ₵54</option>
-      <option value="60">10GB – ₵60</option>
-    </select>
+    <h3>MTN Data Bundles</h3>
+    <p>Select a bundle and enter your MTN number:</p>
+    <div class="mtn-bundles">
+      <button data-price="5.5">1GB – ₵5.50</button>
+      <button data-price="12">2GB – ₵12</button>
+      <button data-price="18">3GB – ₵18</button>
+      <button data-price="24">4GB – ₵24</button>
+      <button data-price="30">5GB – ₵30</button>
+      <button data-price="36">6GB – ₵36</button>
+      <button data-price="42">7GB – ₵42</button>
+      <button data-price="48">8GB – ₵48</button>
+      <button data-price="54">9GB – ₵54</button>
+      <button data-price="60">10GB – ₵60</button>
+    </div>
     <input id="mtnNumber" placeholder="MTN Number (e.g. 054xxxxxxx)" />
-    <button class="pay" id="addMtnToCart">Add to Cart</button>
+    <p style="font-size:.9rem">
+      ⚠ TURBONET / MERCHANT / BROADBAND SIMs do not work.<br>
+      ⚠ Wrong numbers are non-refundable.<br>
+      ⏱ Delivery: 30 mins – 1 hour.
+    </p>
+    <button class="pay" id="mtnPay">Pay for Bundle</button>
   </div>
 </div>
 
@@ -169,92 +228,97 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-</script>
 
-<script>
-// THEME TOGGLE
-document.getElementById('themeBtn').onclick = ()=>document.body.classList.toggle('dark');
+// THEME
+document.getElementById('themeBtn').onclick = () => document.body.classList.toggle('dark');
 
 // CART LOGIC
 let cart = [];
 const cartModal = document.getElementById('cartModal');
 const cartItems = document.getElementById('cartItems');
 const cartTotal = document.getElementById('cartTotal');
+document.getElementById('cartBtn').onclick = () => cartModal.classList.add('show');
 
 function renderCart(){
-  cartItems.innerHTML = '';
+  cartItems.innerHTML='';
   let total=0;
-  cart.forEach((item,idx)=>{
-    total += item.price * item.qty;
-    cartItems.innerHTML += `<div class="cart-item">${item.name} x${item.qty} 
-      <div>
-        <button onclick='inc(${idx})'>+</button>
-        <button onclick='dec(${idx})'>-</button>
-      </div>
-    </div>`;
+  cart.forEach((i,idx)=>{
+    total+=i.price*i.qty;
+    cartItems.innerHTML+=`<div class='cart-item'>${i.name} x${i.qty} <div><button onclick='inc(${idx})'>+</button><button onclick='dec(${idx})'>-</button></div></div>`;
   });
-  cartTotal.textContent = total;
+  cartTotal.textContent=total;
 }
-
-// CART INC/DEC
-window.inc = i=>{cart[i].qty++; renderCart();}
-window.dec = i=>{cart[i].qty>1?cart[i].qty--:cart.splice(i,1); renderCart();}
+window.inc=i=>{cart[i].qty++;renderCart();}
+window.dec=i=>{cart[i].qty>1?cart[i].qty--:cart.splice(i,1);renderCart();}
 
 // PHYSICAL PRODUCTS
 document.querySelectorAll('.card').forEach(card=>{
-  const name = card.dataset.name;
-  const price = Number(card.dataset.price||0);
-  if(card.querySelector('.buy')&&!card.classList.contains('mtn-card')){
-    card.querySelector('.buy').onclick=()=>{
-      cart.push({name,price,qty:1});
-      renderCart(); cartModal.classList.add('show');
-    }
+  const name=card.dataset.name;
+  const price=Number(card.dataset.price||0);
+  const imgs=(card.dataset.images||'').split(',');
+  if(card.querySelector('.buy') && !card.classList.contains('mtn-card')){
+    card.querySelector('.buy').onclick=()=>{cart.push({name,price,qty:1});renderCart();cartModal.classList.add('show')};
+  }
+  if(card.querySelector('.details')){
+    card.querySelector('.details').onclick=()=>{
+      document.getElementById('detailsTitle').textContent=name;
+      const g=document.getElementById('detailsGallery'); g.innerHTML='';
+      imgs.forEach(s=>{const im=document.createElement('img');im.src=s;im.onclick=()=>im.classList.toggle('zoom');g.appendChild(im)});
+      document.getElementById('detailsModal').classList.add('show');
+    };
   }
 });
 
-// MTN BUNDLE MODAL
-function openMTNModal(){document.getElementById('mtnModal').classList.add('show')}
-document.getElementById('addMtnToCart').onclick=()=>{
-  const select = document.getElementById('mtnBundleSelect');
-  const price = Number(select.value);
-  const text = select.selectedOptions[0].text;
-  const number = document.getElementById('mtnNumber').value.trim();
-  if(!number || number.length<9){alert('Enter a valid MTN number'); return;}
-  cart.push({name:'MTN '+text+' ('+number+')', price, qty:1, mtn:true});
-  renderCart();
-  document.getElementById('mtnModal').classList.remove('show');
-  document.getElementById('mtnNumber').value='';
-  cartModal.classList.add('show');
-}
-
-// PAYSTACK CHECKOUT
-document.getElementById('checkoutBtn').onclick=()=>{
-  const total = Number(cartTotal.textContent);
-  const name = document.getElementById('custName').value || 'Guest';
-  const phone = document.getElementById('custPhone').value || '0000000000';
-  const email = document.getElementById('custEmail').value || 'guest@example.com';
-  if(!total){alert('Cart is empty'); return;}
-  const handler = PaystackPop.setup({
+// PAYSTACK FOR CART
+document.getElementById('checkoutBtn').onclick=async()=>{
+  const total=Number(cartTotal.textContent);
+  if(!total){alert('Cart empty');return;}
+  const handler=PaystackPop.setup({
     key:'pk_live_98575428080557d261e91cb92fe745f878fc4278',
-    email, amount:total*100, currency:'GHS',
-    metadata:{custom_fields:[
-      {display_name:"Name", variable_name:"name", value:name},
-      {display_name:"Phone", variable_name:"phone", value:phone},
-      {display_name:"MTN Bundles", variable_name:"bundles", value:JSON.stringify(cart.filter(c=>c.mtn))}
-    ]},
-    callback: async res=>{
-      await addDoc(collection(db,'orders'), {cart, amount:total, ref:res.reference, time:serverTimestamp()});
-      alert('Payment successful'); cart=[]; renderCart(); cartModal.classList.remove('show');
+    email:'jbellingham771@gmail.com',
+    amount:total*100,
+    currency:'GHS',
+    callback:async res=>{
+      await addDoc(collection(db,'orders'),{cart,amount:total,ref:res.reference,time:serverTimestamp()});
+      alert('Payment successful'); cart=[];renderCart();cartModal.classList.remove('show');
     },
     onClose:()=>alert('Payment cancelled')
-  });
-  handler.openIframe();
-}
+  }); handler.openIframe();
+};
 
-// MODAL CONTROLS
-document.getElementById('cartBtn').onclick=()=>cartModal.classList.add('show');
-document.getElementById('notifyBtn').onclick=()=>document.getElementById('noticeModal').classList.add('show');
+// MTN MODAL
+let selectedMTNPrice=5.5;
+document.querySelectorAll('.mtn-bundles button').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.mtn-bundles button').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedMTNPrice=Number(btn.dataset.price);
+  };
+});
+window.openMTN=()=>document.getElementById('mtnModal').classList.add('show');
+window.openMTNDetails=()=>document.getElementById('noticeModal').classList.add('show');
+document.getElementById('mtnPay').onclick=async()=>{
+  const number=document.getElementById('mtnNumber').value.trim();
+  if(!number || number.length<9){alert('Enter valid MTN number');return;}
+  const handler=PaystackPop.setup({
+    key:'pk_live_98575428080557d261e91cb92fe745f878fc4278',
+    email:'jbellingham771@gmail.com',
+    amount:selectedMTNPrice*100,
+    currency:'GHS',
+    metadata:{custom_fields:[{display_name:'MTN Number', variable_name:'mtn_number', value:number}]},
+    callback:async res=>{
+      await addDoc(collection(db,'mtn_orders'),{type:'MTN Bundle',number,amount:selectedMTNPrice,reference:res.reference,time:serverTimestamp()});
+      alert('MTN Bundle payment successful!');
+      document.getElementById('mtnModal').classList.remove('show');document.getElementById('mtnNumber').value='';
+    },
+    onClose:()=>alert('Payment cancelled')
+  }); handler.openIframe();
+};
+
+// NOTICES & CLOSE
+const noticeModal=document.getElementById('noticeModal');
+document.getElementById('notifyBtn').onclick=()=>noticeModal.classList.add('show');
 document.querySelectorAll('.close').forEach(c=>c.onclick=()=>document.querySelectorAll('.modal').forEach(m=>m.classList.remove('show')));
 </script>
 </body>
-  </html>
+</html>
