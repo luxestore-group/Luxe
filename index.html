@@ -155,6 +155,7 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
 <p><strong>Total:</strong> ₵<span id="cartTotal">0</span></p>
 <input id="custName" placeholder="Your name">
 <input id="custPhone" placeholder="Phone number">
+<input id="custEmail" placeholder="Email">
 <button class="pay" id="checkoutBtn">Checkout & Pay</button>
 </div>
 </div>
@@ -166,8 +167,6 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
 <h3 id="detailsTitle"></h3>
 <div class="gallery" id="detailsGallery"></div>
 <p><strong>Delivery:</strong> 2–3 weeks upon purchase</p>
-<p><strong>More info:</strong></p>
-<p></p>
 </div>
 </div>
 
@@ -190,6 +189,8 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
 <button data-price="60">10GB – ₵60</button>
 </div>
 <input id="mtnNumber" placeholder="MTN Number (e.g. 054xxxxxxx)">
+<input id="mtnName" placeholder="Your name">
+<input id="mtnEmail" placeholder="Email">
 <button class="pay" id="mtnPay">Pay for Bundle</button>
 </div>
 </div>
@@ -211,100 +212,176 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
 </div>
 </div>
 
-<script>
-// Simple JS to handle buttons and modals
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCZdOPS1D0pSW8jYjL1p7Q9JpES06Pc-UE",
+  authDomain: "luxe-5a8e8.firebaseapp.com",
+  projectId: "luxe-5a8e8",
+  storageBucket: "luxe-5a8e8.appspot.com",
+  messagingSenderId: "178257618326",
+  appId: "1:178257618326:web:3c6c26f267dfcf73d3e9b7"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// THEME
+document.getElementById('themeBtn').onclick = () => document.body.classList.toggle('dark');
+
+// CART LOGIC
 let cart = [];
 const cartModal = document.getElementById('cartModal');
 const cartItems = document.getElementById('cartItems');
 const cartTotal = document.getElementById('cartTotal');
 
-// Theme toggle
-document.getElementById('themeBtn').onclick = () => document.body.classList.toggle('dark');
-
-// Open/close modals
-document.querySelectorAll('.close').forEach(c => c.onclick = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')));
 document.getElementById('cartBtn').onclick = () => cartModal.classList.add('show');
 document.getElementById('notifyBtn').onclick = () => document.getElementById('noticeModal').classList.add('show');
+document.querySelectorAll('.close').forEach(c => c.onclick = () => document.querySelectorAll('.modal').forEach(m=>m.classList.remove('show')));
 
-// Render Cart
-function renderCart() {
-  cartItems.innerHTML = '';
-  let total = 0;
-  cart.forEach((i, idx) => {
-    total += i.price * i.qty;
-    cartItems.innerHTML += `<div class='cart-item'>${i.name} x${i.qty} <button onclick='inc(${idx})'>+</button> <button onclick='dec(${idx})'>-</button></div>`;
+function renderCart(){
+  cartItems.innerHTML='';
+  let total=0;
+  cart.forEach((i,idx)=>{
+    total+=i.price*i.qty;
+    cartItems.innerHTML+=`<div class='cart-item'>${i.name} x${i.qty} 
+      <button onclick='inc(${idx})'>+</button> 
+      <button onclick='dec(${idx})'>-</button>
+    </div>`;
   });
-  cartTotal.textContent = total;
+  cartTotal.textContent=total;
 }
-window.inc = i => { cart[i].qty++; renderCart(); }
-window.dec = i => { cart[i].qty>1?cart[i].qty--:cart.splice(i,1); renderCart(); }
+window.inc=i=>{cart[i].qty++;renderCart();}
+window.dec=i=>{cart[i].qty>1?cart[i].qty--:cart.splice(i,1);renderCart();}
 
-// Add to cart
-document.querySelectorAll('.card').forEach(card => {
-  const name = card.dataset.name;
-  const price = Number(card.dataset.price||0);
-  const images = (card.dataset.images||'').split(',');
+// Order ID generator
+function generateOrderId(type="ORD"){
+  const date=new Date();
+  const y=date.getFullYear();
+  const m=String(date.getMonth()+1).padStart(2,'0');
+  const d=String(date.getDate()).padStart(2,'0');
+  const rand=Math.floor(Math.random()*900+100);
+  return `${type}-${y}${m}${d}-${rand}`;
+}
+
+// Add to cart & details
+document.querySelectorAll('.card').forEach(card=>{
+  const name=card.dataset.name;
+  const price=Number(card.dataset.price||0);
+  const images=(card.dataset.images||'').split(',');
   if(card.querySelector('.buy') && !card.classList.contains('mtn-card')){
-    card.querySelector('.buy').onclick = () => { cart.push({name,price,qty:1}); renderCart(); cartModal.classList.add('show'); }
+    card.querySelector('.buy').onclick=()=>{cart.push({name,price,qty:1}); renderCart(); cartModal.classList.add('show');}
   }
   if(card.querySelector('.details')){
-    card.querySelector('.details').onclick = () => {
-      document.getElementById('detailsTitle').textContent = name;
-      const g = document.getElementById('detailsGallery'); g.innerHTML = '';
-      images.forEach(s => { const im = document.createElement('img'); im.src=s; im.onclick=()=>im.classList.toggle('zoom'); g.appendChild(im); });
+    card.querySelector('.details').onclick=()=>{
+      document.getElementById('detailsTitle').textContent=name;
+      const g=document.getElementById('detailsGallery'); g.innerHTML='';
+      images.forEach(s=>{const im=document.createElement('img'); im.src=s; im.onclick=()=>im.classList.toggle('zoom'); g.appendChild(im);});
       document.getElementById('detailsModal').classList.add('show');
     }
   }
 });
 
-// Paystack Checkout
-document.getElementById('checkoutBtn').onclick = () => {
+// Paystack checkout for normal products
+document.getElementById('checkoutBtn').onclick=async()=>{
   if(cart.length===0){alert('Cart empty'); return;}
-  const total = Number(cartTotal.textContent);
-  const email = prompt("Enter your email:");
-  const handler = PaystackPop.setup({
+  const name=document.getElementById('custName').value.trim();
+  const phone=document.getElementById('custPhone').value.trim();
+  const email=document.getElementById('custEmail').value.trim();
+  if(!name || !phone || !email){alert('Fill all info'); return;}
+  const total=Number(cartTotal.textContent);
+  const orderId=generateOrderId("ORD");
+
+  const handler=PaystackPop.setup({
     key:'pk_live_98575428080557d261e91cb92fe745f878fc4278',
     email:email,
-    amount: total*100,
+    amount:total*100,
     currency:'GHS',
-    callback: res => { alert('Payment successful!'); cart=[]; renderCart(); cartModal.classList.remove('show'); },
-    onClose: ()=>alert('Payment cancelled')
+    callback: async res=>{
+      await addDoc(collection(db,'orders'),{
+        orderId,
+        customerName:name,
+        customerPhone:phone,
+        customerEmail:email,
+        items:cart,
+        totalAmount:total,
+        status:'Pending',
+        reference:res.reference,
+        timestamp:serverTimestamp()
+      });
+      alert('Payment successful! Order ID: '+orderId);
+      cart=[]; renderCart(); cartModal.classList.remove('show');
+    },
+    onClose:()=>alert('Payment cancelled')
   });
   handler.openIframe();
 };
 
-// WhatsApp Order Button
-document.getElementById('orderBtn').onclick = () => {
-  if(cart.length===0){alert('Cart empty'); return;}
-  let message = 'Hello, I would like to confirm my order:\n';
-  cart.forEach(item => message += `${item.name} x${item.qty} - ₵${item.price*item.qty}\n`);
-  message += `Total: ₵${cart.reduce((s,i)=>s+i.price*i.qty,0)}`;
-  window.open(`https://wa.me/233548164533?text=${encodeURIComponent(message)}`, '_blank');
-};
-
-// MTN Modal
+// MTN Bundles
 let selectedMTNPrice=5.5;
+let selectedMTNBundle="1GB";
 document.querySelectorAll('.mtn-bundles button').forEach(btn=>{
   btn.onclick=()=>{
     document.querySelectorAll('.mtn-bundles button').forEach(b=>b.classList.remove('selected'));
-    btn.classList.add('selected'); selectedMTNPrice=Number(btn.dataset.price);
+    btn.classList.add('selected');
+    selectedMTNPrice=Number(btn.dataset.price);
+    selectedMTNBundle=btn.textContent.split('–')[0].trim();
   }
 });
-document.getElementById('mtnOpenBtn').onclick = ()=>document.getElementById('mtnModal').classList.add('show');
-document.getElementById('mtnPay').onclick = ()=>{
-  const number = document.getElementById('mtnNumber').value.trim();
-  if(!number){alert('Enter MTN number'); return;}
-  const email = prompt("Enter your email:");
-  const handler = PaystackPop.setup({
+document.getElementById('mtnOpenBtn').onclick=()=>document.getElementById('mtnModal').classList.add('show');
+document.getElementById('mtnPay').onclick=async()=>{
+  const number=document.getElementById('mtnNumber').value.trim();
+  const name=document.getElementById('mtnName').value.trim();
+  const email=document.getElementById('mtnEmail').value.trim();
+  if(!number || !name || !email){alert('Fill all info'); return;}
+  const orderId=generateOrderId("MTN");
+  const handler=PaystackPop.setup({
     key:'pk_live_98575428080557d261e91cb92fe745f878fc4278',
     email:email,
     amount:selectedMTNPrice*100,
     currency:'GHS',
-    callback: res => { alert('MTN payment successful!'); document.getElementById('mtnModal').classList.remove('show'); document.getElementById('mtnNumber').value=''; },
-    onClose: ()=>alert('Payment cancelled')
+    metadata:{custom_fields:[{display_name:'MTN Number', variable_name:'mtn_number', value:number}]},
+    callback:async res=>{
+      await addDoc(collection(db,'mtn_orders'),{
+        orderId,
+        customerName:name,
+        customerPhone:number, // FIXED: store MTN number correctly
+        customerEmail:email,
+        bundle:selectedMTNBundle,
+        amount:selectedMTNPrice,
+        status:'Pending',
+        reference:res.reference,
+        timestamp:serverTimestamp()
+      });
+      alert('MTN payment successful! Order ID: '+orderId);
+      document.getElementById('mtnModal').classList.remove('show');
+      document.getElementById('mtnNumber').value='';
+      document.getElementById('mtnName').value='';
+      document.getElementById('mtnEmail').value='';
+    },
+    onClose:()=>alert('Payment cancelled')
   });
   handler.openIframe();
 };
+
+// WhatsApp Confirm Order (normal cart + MTN bundle)
+document.getElementById('orderBtn').onclick=()=>{
+  let message='Hello, I would like to confirm my order:\n';
+
+  // Normal cart
+  cart.forEach(item=>message+=`${item.name} x${item.qty} - ₵${item.price*item.qty}\n`);
+
+  // MTN bundle
+  const mtnNumber=document.getElementById('mtnNumber').value.trim();
+  if(mtnNumber){
+    message+=`MTN Bundle: ${selectedMTNBundle} - ₵${selectedMTNPrice}\nMTN Number: ${mtnNumber}\n`;
+  }
+
+  const total=(cart.reduce((s,i)=>s+i.price*i.qty,0))+(mtnNumber?selectedMTNPrice:0);
+  message+=`Total: ₵${total}`;
+
+  window.open(`https://wa.me/233548164533?text=${encodeURIComponent(message)}`,'_blank');
+};
 </script>
-</body>
-  </html>
+</body
