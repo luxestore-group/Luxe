@@ -61,7 +61,7 @@ input{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px solid #cc
 </header>
 
 <div class="products">
-  <!-- PHYSICAL PRODUCT EXAMPLES -->
+  <!-- PHYSICAL PRODUCTS -->
   <div class="card" data-name="Silver Crest Blender 2in1 2.0L" data-price="300" data-images="images/blender.jpg,images/blenders.jpg,images/blender2.jpg">
     <img src="images/blender.jpg" />
     <div class="card-body">
@@ -122,7 +122,7 @@ input{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px solid #cc
     </div>
   </div>
 
-  <!-- MTN DATA BUNDLE CARD -->
+  <!-- MTN DATA BUNDLE -->
   <div class="card mtn-card">
     <img src="images/databundles.jpg" />
     <div class="card-body">
@@ -134,7 +134,6 @@ input{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px solid #cc
       </div>
     </div>
   </div>
-
 </div>
 
 <!-- CART MODAL -->
@@ -224,86 +223,91 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// THEME
-document.getElementById('themeBtn').onclick=()=>document.body.classList.toggle('dark');
+// THEME TOGGLE
+document.getElementById('themeBtn').onclick = () => document.body.classList.toggle('dark');
 
 // CART LOGIC
-let cart=[];
-const cartModal=document.getElementById('cartModal');
-const cartItems=document.getElementById('cartItems');
-const cartTotal=document.getElementById('cartTotal');
-document.getElementById('cartBtn').onclick=()=>cartModal.classList.add('show');
+let cart = [];
+const cartModal = document.getElementById('cartModal');
+const cartItems = document.getElementById('cartItems');
+const cartTotal = document.getElementById('cartTotal');
+document.getElementById('cartBtn').onclick = () => cartModal.classList.add('show');
 
-function renderCart(){
-  cartItems.innerHTML=''; let total=0;
-  cart.forEach((i,idx)=>{
-    total+=i.price*i.qty;
-    cartItems.innerHTML+=`<div class='cart-item'>${i.name} x${i.qty} <div><button onclick='window.inc(${idx})'>+</button><button onclick='window.dec(${idx})'>-</button></div></div>`;
-  });
-  cartTotal.textContent=total;
+function renderCart() {
+    cartItems.innerHTML = '';
+    let total = 0;
+    cart.forEach((i, idx) => {
+        total += i.price * i.qty;
+        cartItems.innerHTML += `<div class='cart-item'>${i.name} x${i.qty} <div><button onclick='inc(${idx})'>+</button><button onclick='dec(${idx})'>-</button></div></div>`;
+    });
+    cartTotal.textContent = total;
 }
-window.inc=i=>{cart[i].qty++;renderCart()};
-window.dec=i=>{cart[i].qty>1?cart[i].qty--:cart.splice(i,1);renderCart()};
+window.inc = i => { cart[i].qty++; renderCart(); };
+window.dec = i => { cart[i].qty > 1 ? cart[i].qty-- : cart.splice(i,1); renderCart(); };
 
+// PHYSICAL PRODUCTS EVENTS
 document.querySelectorAll('.card').forEach(card=>{
-  const name=card.dataset.name; 
-  const price=Number(card.dataset.price||0);
-  const imgs=(card.dataset.images||'').split(',');
-  if(card.querySelector('.buy') && !card.classList.contains('mtn-card')){
-    card.querySelector('.buy').onclick=()=>{cart.push({name,price,qty:1});renderCart();cartModal.classList.add('show')};
-  }
-  if(card.querySelector('.details')){
-    card.querySelector('.details').onclick=()=>{
-      document.getElementById('detailsTitle').textContent=name;
-      const g=document.getElementById('detailsGallery'); g.innerHTML='';
-      imgs.forEach(s=>{const im=document.createElement('img');im.src=s;im.onclick=()=>im.classList.toggle('zoom');g.appendChild(im)});
-      document.getElementById('detailsModal').classList.add('show');
-    };
-  }
+    const name = card.dataset.name;
+    const price = Number(card.dataset.price || 0);
+    const imgs = (card.dataset.images || '').split(',');
+    if(card.querySelector('.buy') && !card.classList.contains('mtn-card')){
+        card.querySelector('.buy').onclick = () => { cart.push({name,price,qty:1}); renderCart(); cartModal.classList.add('show'); };
+    }
+    if(card.querySelector('.details')){
+        card.querySelector('.details').onclick = ()=>{
+            document.getElementById('detailsTitle').textContent = name;
+            const g = document.getElementById('detailsGallery'); g.innerHTML='';
+            imgs.forEach(s=>{const im=document.createElement('img'); im.src=s; im.onclick=()=>im.classList.toggle('zoom'); g.appendChild(im);});
+            document.getElementById('detailsModal').classList.add('show');
+        };
+    }
 });
 
 // PAYSTACK FOR CART
-document.getElementById('checkoutBtn').onclick=async()=>{
-  const total=Number(cartTotal.textContent);
-  if(!total){alert('Cart is empty'); return;}
-  const handler=PaystackPop.setup({
-    key:'pk_live_98575428080557d261e91cb92fe745f878fc4278',
-    email:'jbellingham771@gmail.com',
-    amount:total*100,currency:'GHS',
-    callback:async res=>{
-      await addDoc(collection(db,'orders'),{cart,amount:total,ref:res.reference,time:serverTimestamp()});
-      alert('Payment successful'); cart=[]; renderCart(); cartModal.classList.remove('show');
-    }
-  }); handler.openIframe();
+document.getElementById('checkoutBtn').onclick = async () => {
+    const total = Number(cartTotal.textContent);
+    if(!total){alert('Cart is empty'); return;}
+    const handler = PaystackPop.setup({
+        key: 'pk_live_98575428080557d261e91cb92fe745f878fc4278',
+        email: 'jbellingham771@gmail.com',
+        amount: total * 100,
+        currency: 'GHS',
+        callback: async res => {
+            await addDoc(collection(db,'orders'), { cart, amount: total, ref: res.reference, time: serverTimestamp() });
+            alert('Payment successful'); cart = []; renderCart(); cartModal.classList.remove('show');
+        }
+    }); handler.openIframe();
 };
 
-// MTN MODAL FUNCTIONS
-window.openMTN=()=>document.getElementById('mtnModal').classList.add('show');
-window.openMTNDetails=()=>document.getElementById('noticeModal').classList.add('show');
-document.getElementById('mtnPay').onclick=async()=>{
-  const bundlePrice=Number(document.getElementById('mtnBundle').value);
-  const number=document.getElementById('mtnNumber').value.trim();
-  if(!number || number.length<9){alert('Enter a valid MTN number'); return;}
-  const handler=PaystackPop.setup({
-    key:'pk_live_98575428080557d261e91cb92fe745f878fc4278',
-    email:'jbellingham771@gmail.com',
-    amount:bundlePrice*100,
-    currency:'GHS',
-    callback:async res=>{
-      await addDoc(collection(db,'mtn_orders'),{
-        type:'MTN Bundle', number, amount:bundlePrice, reference:res.reference, time:serverTimestamp()
-      });
-      alert('MTN Bundle payment successful!');
-      document.getElementById('mtnModal').classList.remove('show');
-      document.getElementById('mtnNumber').value='';
-    }
-  }); handler.openIframe();
+// MTN MODAL PAYSTACK
+window.openMTN = () => document.getElementById('mtnModal').classList.add('show');
+window.openMTNDetails = () => document.getElementById('noticeModal').classList.add('show');
+document.getElementById('mtnPay').onclick = async () => {
+    const price = Number(document.getElementById('mtnBundle').value);
+    const number = document.getElementById('mtnNumber').value.trim();
+    if(!number || number.length < 9){alert('Enter valid MTN number'); return;}
+    const handler = PaystackPop.setup({
+        key: 'pk_live_98575428080557d261e91cb92fe745f878fc4278',
+        email: 'jbellingham771@gmail.com',
+        amount: price*100,
+        currency: 'GHS',
+        metadata:{custom_fields:[{display_name:'MTN Number', variable_name:'mtn_number', value:number}]},
+        callback: async res => {
+            await addDoc(collection(db,'mtn_orders'), {
+                type:'MTN Bundle', number, amount:price, bundle: document.getElementById('mtnBundle').selectedOptions[0].text, reference: res.reference, time: serverTimestamp()
+            });
+            alert('Payment successful for ' + document.getElementById('mtnBundle').selectedOptions[0].text);
+            document.getElementById('mtnModal').classList.remove('show'); document.getElementById('mtnNumber').value='';
+        },
+        onClose: ()=>alert('Payment cancelled.')
+    });
+    handler.openIframe();
 };
 
-// NOTICES & CLOSES
-const noticeModal=document.getElementById('noticeModal');
-document.getElementById('notifyBtn').onclick=()=>noticeModal.classList.add('show');
-document.querySelectorAll('.close').forEach(c=>c.onclick=()=>document.querySelectorAll('.modal').forEach(m=>m.classList.remove('show')));
+// NOTICES
+const noticeModal = document.getElementById('noticeModal');
+document.getElementById('notifyBtn').onclick = ()=>noticeModal.classList.add('show');
+document.querySelectorAll('.close').forEach(c => c.onclick = ()=>document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')));
 </script>
 </body>
 </html>
