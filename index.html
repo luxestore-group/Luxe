@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Luxe Store</title>
 <script src="https://js.paystack.co/v1/inline.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
 <style>
 /* --- EXISTING CSS --- */
 :root{--gold:#b8860b;--silver:#c0c0c0}
@@ -21,13 +23,25 @@ body.dark header{background:linear-gradient(90deg,#444,#666,#999)}
     width: 40px;
     margin-right: 10px;
 }
-.header-content { flex-grow: 1; text-align: center; display: flex; align-items: center; justify-content: center; } 
+.header-content { flex-grow: 1; text-align: center; display: flex; align-items: center; justify-content: center; flex-direction: column;} 
 .header-content h1 { margin: 0; }
-h1{font-size:1.8rem;}
-.welcome-message { font-size: 0.9rem; margin-top: 4px; color: #555; }
+/* 2. APPLY STYLISH FONT TO H1 AND WELCOME MESSAGE */
+h1{
+    font-size:1.8rem;
+    font-family: 'Playfair Display', serif; /* Apply stylish font */
+    font-weight: 700;
+}
+.welcome-message { 
+    font-size: 0.9rem; 
+    margin-top: 4px; 
+    color: #555; 
+    font-family: 'Playfair Display', serif; /* Apply stylish font */
+    font-style: italic;
+}
 body.dark .welcome-message { color: #ccc; }
 
 .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:16px}
+/* 3. CURVE VERTICES OF DASHBOARD CARDS */
 .card{background:#fff;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.2);overflow:hidden;transition:.3s}
 body.dark .card{background:#222}
 .card img{width:100%;height:180px;object-fit:cover; cursor: pointer;} /* Make product image clickable */
@@ -39,6 +53,7 @@ body.dark .card{background:#222}
 .details{background:#c0c0c0}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);align-items:center;justify-content:center;z-index:1000}
 .modal.show{display:flex}
+/* 3. CURVE VERTICES OF MODAL BOXES (The 'dashboard' elements) */
 .modal-box{background:#fff;color:#000;padding:16px;border-radius:14px;max-width:560px;width:95%;max-height:90vh;overflow:auto;position:relative}
 body.dark .modal-box{background:#222;color:#fff}
 .close{position:absolute;right:12px;top:8px;font-size:20px;cursor:pointer}
@@ -55,6 +70,7 @@ body.dark .modal-box{background:#222;color:#fff}
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    border-radius: 0; /* Keep image viewer transparent box sharp for background */
 }
 #imageViewerContent {
     position: relative;
@@ -164,6 +180,8 @@ input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px s
     flex-direction: column;
     gap: 15px;
     box-sizing: border-box; /* FIX 1: Ensures padding is included in the 250px width */
+    border-top-right-radius: 14px; /* Curve the vertices of the side menu */
+    border-bottom-right-radius: 14px; /* Curve the vertices of the side menu */
 }
 body.dark #sideMenu { background: #222; color: #fff; }
 #sideMenu.open { transform: translateX(0); }
@@ -216,9 +234,9 @@ body.dark #sideMenu #supportBtn_menu { background: #444; color: #fff; }
     <div class="header-content"> 
         <img src="images/luxe_logo.png" alt="Luxe Store Logo" class="header-logo"> 
         <h1>Luxe Store</h1>
+        <p class="welcome-message">Welcome to the new world, Dear!</p>
     </div>
-    <div style="width: 24px; margin-right: 15px;"></div> <p class="welcome-message" style="display: none;">Welcome to our new world, Dear.</p>
-</header>
+    <div style="width: 24px; margin-right: 15px;"></div> </header>
 
 <div class="products">
 <div class="card" data-name="Silver Crest Blender 2in1 2.0L" data-price="300" data-images="images/blender.jpg,images/blenders.jpg,images/blender2.jpg" data-description="Powerful 2.0L blender with stainless steel blades. Crushes ice, blends smoothies, and grinds spices effortlessly with its versatile 2-in-1 design.">
@@ -623,7 +641,6 @@ function handleGesture() {
 document.querySelectorAll('.card').forEach(card=>{
   const name=card.dataset.name;
   const description = card.dataset.description;
-  // FIX APPLIED HERE: Changed dataset.product-index to dataset.productIndex
   const productIndex = Number(card.querySelector('img').dataset.productIndex); 
 
   // 1. Image click opens the viewer
@@ -755,8 +772,8 @@ orderBtnHandler.onclick=()=>{
   let message=`Hello Luxe Store! I am confirming my order details for manual processing.\n\n*Account Email:* ${auth.currentUser.email}\n\n*--- ORDER SUMMARY ---*${itemsList}\n\n*GRAND TOTAL: ₵${total}*\n\n*--- CUSTOMER & DELIVERY DETAILS ---*
 Please use the following information for my delivery:
 \n\u2022 *Full Name:* [ENTER YOUR FULL NAME]
-\u2022 *Phone Number:* [ENTER YOUR ACTIVE PHONE NUMBER]
-\u2022 *Delivery Location:* [ENTER YOUR TOWN, STREET NAME, AND NEAREST LANDMARK]
+\n\u2022 *Phone Number:* [ENTER YOUR ACTIVE PHONE NUMBER]
+\n\u2022 *Delivery Location:* [ENTER YOUR TOWN, STREET NAME, AND NEAREST LANDMARK]
 \n\nPlease reply to confirm the order and delivery charge. Thank you!`;
   
   const whatsappUrl = `https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=${encodeURIComponent(message)}`; 
