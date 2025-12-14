@@ -405,7 +405,9 @@ const db = getFirestore(app);
 const auth = getAuth(app); 
 
 // === 2. PAYSTACK CONFIGURATION ===
+// Public Key verified: pk_live_98575428080557d261e91cb92fe745f878fc4278
 const PAYSTACK_PUBLIC_KEY = 'pk_live_98575428080557d261e91cb92fe745f878fc4278';
+// Customer service number in international format
 const CUSTOMER_SERVICE_NUMBER = '233548164533'; 
 
 let cart = [];
@@ -520,6 +522,7 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         authModal.classList.remove('show');
         logoutBtnMenu.style.display = 'block'; 
+        // Automatically populate email fields
         document.getElementById('custEmail').value = user.email;
         document.getElementById('mtnEmail').value = user.email;
     } else {
@@ -686,14 +689,19 @@ document.getElementById('checkoutBtn').onclick=()=>{
   const name=document.getElementById('custName').value.trim();
   const phone=document.getElementById('custPhone').value.trim();
   const email=document.getElementById('custEmail').value.trim();
-  if(!name||!phone||!email){alert('Fill all info'); return;}
+  
+  // Enforce required fields for Paystack
+  if(!name||!phone||!email){alert('Fill in your Name, Phone number, and Email before proceeding to payment.'); return;}
+  
   const total=Number(cartTotal.textContent);
   const orderId=generateOrderId("ORD");
   const userId = auth.currentUser.uid; 
 
   const handler=PaystackPop.setup({
     key:PAYSTACK_PUBLIC_KEY, 
-    email:email, amount:total*100, currency:'GHS',
+    email:email, 
+    amount:total*100, // Amount in Kobo/Pesewas
+    currency:'GHS',
     callback:async res=>{
       await addDoc(collection(db,'orders'),{
         orderId, userId, customerName:name, customerPhone:phone, customerEmail:email,
@@ -726,13 +734,18 @@ document.getElementById('mtnPay').onclick=()=>{
   const number=document.getElementById('mtnNumber').value.trim();
   const name=document.getElementById('mtnName').value.trim();
   const email=document.getElementById('mtnEmail').value.trim();
-  if(!number||!name||!email){alert('Fill all info'); return;}
+  
+  // Enforce required fields for MTN Paystack
+  if(!number||!name||!email){alert('Fill in the MTN Number, your Name, and Email before proceeding to payment.'); return;}
+  
   const orderId=generateOrderId("MTN");
   const userId = auth.currentUser.uid; 
 
   const handler=PaystackPop.setup({
     key:PAYSTACK_PUBLIC_KEY, 
-    email:email, amount:selectedMTNPrice*100, currency:'GHS',
+    email:email, 
+    amount:selectedMTNPrice*100, 
+    currency:'GHS',
     metadata:{custom_fields:[{display_name:'MTN Number', variable_name:'mtn_number', value:number}]},
     callback:async res=>{
       await addDoc(collection(db,'mtn_orders'),{
