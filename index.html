@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
-/* ... (Your existing CSS remains here) ... */
+/* CSS STYLES */
 :root{--gold:#b8860b;--silver:#c0c0c0}
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif;}
 body{background:#fff8f0;color:#333;transition:.3s}
@@ -52,6 +52,7 @@ body.dark .modal-box{background:#222;color:#fff}
 .notice ul{padding-left:18px}
 .notice li{margin-bottom:6px}
 .pay{background:var(--gold);color:#fff;padding:10px;border:none;border-radius:10px;width:100%;font-weight:bold;cursor:pointer}
+.pay:disabled {background: #ccc; cursor: not-allowed;}
 input, select{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px solid #ccc}
 .mtn-card img{background:#ffd700;padding:14px;object-fit:contain}
 .mtn-bundles{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;margin-top:10px}
@@ -105,77 +106,54 @@ body.dark #sideMenu #supportBtn_menu { background: #444; color: #fff; }
 </header>
 
 <div class="products">
-<div class="card" data-name="Silver Crest Blender 2in1 2.0L" data-price="300" data-images="images/blender.jpg,images/blenders.jpg,images/blender2.jpg" data-description="Powerful 2.0L blender with stainless steel blades. Crushes ice, blends smoothies, and grinds spices effortlessly with its versatile 2-in-1 design.">
-<img src="images/blender.jpg" data-product-index="0">
-<div class="card-body">
-<h3>Silver Crest Blender 2-in1- 2.0L</h3>
-<p class="price">₵300</p>
-<div class="buttons">
-<button class="buy">Add to Cart</button>
-<button class="details">More Details</button>
-</div>
-</div>
-</div>
-
-<div class="card" data-name="Superbass 2-in-1 Earphones" data-price="65" data-images="images/headphones.jpg,images/headphones1.jpg" data-description="High-fidelity audio with deep bass. These 2-in-1 earphones switch easily between wired audio and a convenient wireless neckband for active use.">
-<img src="images/headphones.jpg" data-product-index="1">
-<div class="card-body">
-<h3>Superbass 2-in-1 Earphones</h3>
-<p class="price">₵65</p>
-<div class="buttons">
-<button class="buy">Add to Cart</button>
-<button class="details">More Details</button>
-</div>
-</div>
-</div>
-
-<div class="card" data-name="Rich Ripple Smart Watch" data-price="200" data-images="images/smartwatch.jpg,images/smartwatch1.jpg" data-description="Sleek smart watch with a vibrant display. Tracks heart rate, sleep, and steps. Receive smartphone notifications and enjoy long battery life.">
-<img src="images/smartwatch.jpg" data-product-index="2">
-<div class="card-body">
-<h3>Rich Ripple Smart Watch</h3>
-<p class="price">₵200</p>
-<div class="buttons">
-<button class="buy">Add to Cart</button>
-<button class="details">More Details</button>
-</div>
-</div>
-</div>
-
-<div class="card" data-name="3-in-1 60W USB Cable" data-price="50" data-images="images/accessories.jpg,images/accessories1.jpg" data-description="Durable, braided cable with 60W fast charging. Includes USB-C, Micro USB, and Lightning connectors in one tangle-free design.">
-<img src="images/accessories.jpg" data-product-index="3">
-<div class="card-body">
-<h3>3-in-1 60W USB Cable</h3>
-<p class="price">₵50</p>
-<div class="buttons">
-<button class="buy">Add to Cart</button>
-<button class="details">More Details</button>
-</div>
-</div>
-</div>
-
-<div class="card" data-name="Oraimo Traveler Powerbank 10000mAh" data-price="200" data-images="images/powerbank.jpg,images/powerbank1.jpg" data-description="Compact 10000mAh powerbank that offers multiple full charges. Features dual output and fast-charging technology for on-the-go power.">
-<img src="images/powerbank.jpg" data-product-index="4">
-<div class="card-body">
-<h3>Oraimo Traveler Powerbank 10000mAh</h3>
-<p class="price">₵200</p>
-<div class="buttons">
-<button class="buy">Add to Cart</button>
-<button class="details">More Details</button>
-</div>
-</div>
-</div>
-
-<div class="card mtn-card" data-name="MTN Data Bundles" data-price="0" data-images="images/databundles.jpg" data-description="Instant MTN data top-ups (1GB to 10GB). Quick delivery (30 mins - 1 hr). Ensure number is correct; non-refundable for wrong numbers.">
-<img src="images/databundles.jpg" data-product-index="5">
-<div class="card-body">
-<h3>MTN Data Bundles</h3>
-<p class="price">₵5.50 – ₵60.00</p>
-<div class="buttons">
-<button class="buy" id="mtnOpenBtn">Buy Bundle</button>
-<button class="details" id="mtnDetailsBtn">More Details</button>
-</div>
-</div>
-</div>
+    <div class="card" data-name="Silver Crest Blender 2in1 2.0L" data-price="300" data-images="images/blender.jpg,images/blenders.jpg,images/blender2.jpg" data-description="Powerful 2.0L blender with stainless steel blades. Crushes ice, blends smoothies, and grinds spices effortlessly with its versatile 2-in-1 design.">
+        <img src="images/blender.jpg" data-product-index="0">
+        <div class="card-body">
+            <h3>Silver Crest Blender 2-in1- 2.0L</h3>
+            <p class="price">₵300</p>
+            <div class="buttons"><button class="buy">Add to Cart</button><button class="details">More Details</button></div>
+        </div>
+    </div>
+    <div class="card" data-name="Superbass 2-in-1 Earphones" data-price="65" data-images="images/headphones.jpg,images/headphones1.jpg" data-description="High-fidelity audio with deep bass. These 2-in-1 earphones switch easily between wired audio and a convenient wireless neckband for active use.">
+        <img src="images/headphones.jpg" data-product-index="1">
+        <div class="card-body">
+            <h3>Superbass 2-in-1 Earphones</h3>
+            <p class="price">₵65</p>
+            <div class="buttons"><button class="buy">Add to Cart</button><button class="details">More Details</button></div>
+        </div>
+    </div>
+    <div class="card" data-name="Rich Ripple Smart Watch" data-price="200" data-images="images/smartwatch.jpg,images/smartwatch1.jpg" data-description="Sleek smart watch with a vibrant display. Tracks heart rate, sleep, and steps. Receive smartphone notifications and enjoy long battery life.">
+        <img src="images/smartwatch.jpg" data-product-index="2">
+        <div class="card-body">
+            <h3>Rich Ripple Smart Watch</h3>
+            <p class="price">₵200</p>
+            <div class="buttons"><button class="buy">Add to Cart</button><button class="details">More Details</button></div>
+        </div>
+    </div>
+    <div class="card" data-name="3-in-1 60W USB Cable" data-price="50" data-images="images/accessories.jpg,images/accessories1.jpg" data-description="Durable, braided cable with 60W fast charging. Includes USB-C, Micro USB, and Lightning connectors in one tangle-free design.">
+        <img src="images/accessories.jpg" data-product-index="3">
+        <div class="card-body">
+            <h3>3-in-1 60W USB Cable</h3>
+            <p class="price">₵50</p>
+            <div class="buttons"><button class="buy">Add to Cart</button><button class="details">More Details</button></div>
+        </div>
+    </div>
+    <div class="card" data-name="Oraimo Traveler Powerbank 10000mAh" data-price="200" data-images="images/powerbank.jpg,images/powerbank1.jpg" data-description="Compact 10000mAh powerbank that offers multiple full charges. Features dual output and fast-charging technology for on-the-go power.">
+        <img src="images/powerbank.jpg" data-product-index="4">
+        <div class="card-body">
+            <h3>Oraimo Traveler Powerbank 10000mAh</h3>
+            <p class="price">₵200</p>
+            <div class="buttons"><button class="buy">Add to Cart</button><button class="details">More Details</button></div>
+        </div>
+    </div>
+    <div class="card mtn-card" data-name="MTN Data Bundles" data-price="0" data-images="images/databundles.jpg" data-description="Instant MTN data top-ups (1GB to 10GB). Quick delivery (30 mins - 1 hr). Ensure number is correct; non-refundable for wrong numbers.">
+        <img src="images/databundles.jpg" data-product-index="5">
+        <div class="card-body">
+            <h3>MTN Data Bundles</h3>
+            <p class="price">₵5.50 – ₵60.00</p>
+            <div class="buttons"><button class="buy" id="mtnOpenBtn">Buy Bundle</button><button class="details" id="mtnDetailsBtn">More Details</button></div>
+        </div>
+    </div>
 </div>
 
 <div class="modal" id="cartModal">
@@ -260,35 +238,42 @@ const DEFAULT_USER_EMAIL = 'jbellingham771@gmail.com';
 let cart = [];
 let allProductsData = []; 
 
-// --- CRITICAL: DYNAMIC PAYSTACK LOADER ---
-// This function ensures Paystack is loaded BEFORE we try to use it.
-function loadPaystack() {
+// --- CRITICAL: SAFE PAYSTACK LOADER ---
+// This function downloads the script safely only when needed.
+function loadPaystackScript() {
     return new Promise((resolve, reject) => {
+        // If already loaded, return it immediately
         if (window.PaystackPop) {
+            console.log("Paystack already loaded.");
             resolve(window.PaystackPop);
             return;
         }
+        console.log("Loading Paystack script...");
         const script = document.createElement('script');
         script.src = 'https://js.paystack.co/v1/inline.js';
-        script.onload = () => resolve(window.PaystackPop);
-        script.onerror = () => reject(new Error('Failed to load Paystack script'));
+        script.onload = () => {
+            console.log("Paystack script loaded successfully.");
+            resolve(window.PaystackPop);
+        };
+        script.onerror = () => {
+            console.error("Failed to load Paystack script.");
+            reject(new Error('Network error: Could not load Paystack. Check internet connection.'));
+        };
         document.head.appendChild(script);
     });
 }
 
-// --- CRITICAL: FIREBASE SETUP AND GLOBAL VARIABLE EXPOSURE ---
+
+// --- FIREBASE SETUP ---
 let app, db, auth;
 let firebaseInitialized = false;
 
-// We use an immediately invoked async function (IIAF) to handle imports cleanly
 (async () => {
     try {
-        // 1. Core Firebase Imports
         const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
         const { getFirestore, collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
         const { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"); 
 
-        // === 1. FIREBASE CONFIGURATION ===
         const firebaseConfig = {
           apiKey: "AIzaSyA6WtaQD8tqriy9_WIBV3DxV9vcKzvNSdI", 
           authDomain: "luxe-datastore.firebaseapp.com",
@@ -298,14 +283,13 @@ let firebaseInitialized = false;
           appId: "1:337992102686:web:791d86196df28baf8b4f0f"
         };
 
-        // Initialize the app and expose services globally within the module scope
         app = initializeApp(firebaseConfig);
         db = getFirestore(app);
         auth = getAuth(app); 
         firebaseInitialized = true;
         console.log("Firebase services initialized successfully.");
 
-        // 2. RUN AUTH LISTENERS HERE (Where 'auth' is guaranteed to be defined)
+        // Auth Listeners
         const authModal = document.getElementById('authModal');
         const logoutBtnMenu = document.getElementById('logoutBtn_menu'); 
         
@@ -313,75 +297,54 @@ let firebaseInitialized = false;
             if (user) {
                 authModal.classList.remove('show');
                 logoutBtnMenu.style.display = 'block'; 
-                // Automatically populate email fields
-                document.getElementById('custEmail').value = user.email;
-                document.getElementById('mtnEmail').value = user.email;
+                if(document.getElementById('custEmail')) document.getElementById('custEmail').value = user.email;
+                if(document.getElementById('mtnEmail')) document.getElementById('mtnEmail').value = user.email;
             } else {
                 authModal.classList.add('show');
                 logoutBtnMenu.style.display = 'none'; 
-                document.getElementById('custEmail').value = DEFAULT_USER_EMAIL;
-                document.getElementById('mtnEmail').value = DEFAULT_USER_EMAIL;
+                if(document.getElementById('custEmail')) document.getElementById('custEmail').value = DEFAULT_USER_EMAIL;
+                if(document.getElementById('mtnEmail')) document.getElementById('mtnEmail').value = DEFAULT_USER_EMAIL;
             }
         });
 
-        // 3. ATTACH AUTH BUTTON LOGIC (Guaranteed 'auth' is defined)
-        const authEmail = document.getElementById('authEmail');
-        const authPassword = document.getElementById('authPassword');
-        const signInBtn = document.getElementById('signInBtn');
-        const signUpBtn = document.getElementById('signUpBtn');
-        const authError = document.getElementById('authError');
-
-        signUpBtn.onclick = async () => {
-            authError.textContent = '';
-            const email = authEmail.value;
-            const password = authPassword.value;
-            if (!email || password.length < 6) {
-                authError.textContent = 'Email and a password of at least 6 characters are required.';
-                return;
-            }
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-            } catch (error) {
-                authError.textContent = error.message.replace('Firebase: Error ', '');
-            }
+        // Auth Buttons
+        document.getElementById('signUpBtn').onclick = async () => {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const err = document.getElementById('authError');
+            err.textContent = '';
+            if (!email || password.length < 6) { err.textContent = 'Email and a password of at least 6 characters are required.'; return; }
+            try { await createUserWithEmailAndPassword(auth, email, password); } 
+            catch (e) { err.textContent = e.message.replace('Firebase: Error ', ''); }
         };
 
-        signInBtn.onclick = async () => {
-            authError.textContent = '';
-            try {
-                await signInWithEmailAndPassword(auth, authEmail.value, authPassword.value);
-            } catch (error) {
-                authError.textContent = 'Sign-in failed. Check email or password.';
-            }
+        document.getElementById('signInBtn').onclick = async () => {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const err = document.getElementById('authError');
+            err.textContent = '';
+            try { await signInWithEmailAndPassword(auth, email, password); } 
+            catch (e) { err.textContent = 'Sign-in failed. Check email or password.'; }
         };
 
-        // Attach Logout
         document.getElementById('logoutBtn_menu').onclick = async () => {
-            try {
-                await signOut(auth);
-                document.getElementById('sideMenu').classList.remove('open');
-                document.getElementById('menuOverlay').style.display = 'none';
-            } catch (error) {
-                console.error("Logout error:", error);
-            }
+            try { await signOut(auth); document.getElementById('sideMenu').classList.remove('open'); document.getElementById('menuOverlay').style.display = 'none'; } 
+            catch (e) { console.error(e); }
         };
         
-        // Finalize DOM operations dependent on initialization success
         initializeDOMHandlers(true);
 
     } catch (error) {
-        console.error("CRITICAL: Firebase initialization or Auth setup failed. Error:", error);
-        alert("CRITICAL ERROR: Failed to connect or set up Firebase Authentication. Check the console (F12) for details.");
-        // If Firebase fails, still initialize the non-Firebase handlers
+        console.error("CRITICAL: Firebase initialization failed.", error);
         initializeDOMHandlers(false);
     }
 })();
 
 
-// --- DOM HANDLERS (Runs regardless of Firebase success) ---
+// --- DOM HANDLERS ---
 function initializeDOMHandlers(authEnabled) {
     
-    // --- DATA INITIALIZATION ---
+    // Data Init
     document.querySelectorAll('.card').forEach((card, index) => {
         allProductsData.push({
             index: index,
@@ -391,57 +354,31 @@ function initializeDOMHandlers(authEnabled) {
         });
     });
 
-    // --- MENU LOGIC ---
+    // Menu
     const sideMenu = document.getElementById('sideMenu');
-    const menuBtn = document.getElementById('menuBtn');
     const menuOverlay = document.getElementById('menuOverlay');
-    
-    function toggleMenu() {
+    const toggleMenu = () => {
         sideMenu.classList.toggle('open');
         menuOverlay.style.display = sideMenu.classList.contains('open') ? 'block' : 'none';
-    }
-
-    menuBtn.onclick = toggleMenu;
+    };
+    document.getElementById('menuBtn').onclick = toggleMenu;
     menuOverlay.onclick = toggleMenu; 
-
-    document.getElementById('cartBtn_menu').onclick = () => {
-        document.getElementById('cartModal').classList.add('show');
-        toggleMenu(); 
-    };
-    document.getElementById('orderBtn_menu').onclick = () => {
-        if (document.getElementById('orderBtn_handler')) {
-            document.getElementById('orderBtn_handler').click();
-        } 
-        toggleMenu();
-    };
-    document.getElementById('themeBtn_menu').onclick = () => {
-        document.body.classList.toggle('dark');
-        document.getElementById('themeBtn_menu').textContent = document.body.classList.contains('dark') ? 'Light / Dark' : 'Dark / Light';
-    };
-    document.getElementById('notifyBtn_menu').onclick = () => {
-        document.getElementById('noticeModal').classList.add('show');
-        toggleMenu();
+    document.getElementById('cartBtn_menu').onclick = () => { document.getElementById('cartModal').classList.add('show'); toggleMenu(); };
+    document.getElementById('orderBtn_menu').onclick = () => { document.getElementById('orderBtn_handler').click(); toggleMenu(); };
+    document.getElementById('themeBtn_menu').onclick = () => { document.body.classList.toggle('dark'); };
+    document.getElementById('notifyBtn_menu').onclick = () => { document.getElementById('noticeModal').classList.add('show'); toggleMenu(); };
+    document.getElementById('supportBtn_menu').onclick = () => { 
+        window.open(`https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=Hello Support`, '_blank'); toggleMenu(); 
     };
 
-    // --- SUPPORT BUTTON (Non-Firebase) ---
-    document.getElementById('supportBtn_menu').onclick = () => {
-        let message = 'Hello Luxe Store Customer Service, I need assistance with my order/query.';
-        const whatsappUrl = `https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=${encodeURIComponent(message)}`; 
-        window.open(whatsappUrl, '_blank');
-        toggleMenu();
-    };
-
-
-    // Close modals
+    // Close Modals
     document.querySelectorAll('.close, #viewerClose').forEach(c => c.onclick = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')));
 
-    // Cart logic
+    // Cart System
     const cartItems=document.getElementById('cartItems');
     const cartTotal=document.getElementById('cartTotal');
-
     function renderCart(){
-      cartItems.innerHTML='';
-      let total=0;
+      cartItems.innerHTML=''; let total=0;
       cart.forEach((i,idx)=>{
         total+=i.price*i.qty;
         const div=document.createElement('div');
@@ -455,297 +392,177 @@ function initializeDOMHandlers(authEnabled) {
       cartTotal.textContent=total;
     }
 
-    // --- IMAGE VIEWER LOGIC (Intact) ---
+    // Image Viewer
     const imageViewerModal = document.getElementById('imageViewerModal');
     const largeProductImage = document.getElementById('largeProductImage');
     const viewerPrev = document.getElementById('viewerPrev');
     const viewerNext = document.getElementById('viewerNext');
-    let currentViewerImages = [];
-    let currentViewerIndex = 0;
-    let currentProductIndex = -1; 
+    let currentViewerImages = [], currentViewerIndex = 0;
 
-    function openImageViewer(productIndex) {
-        const product = allProductsData[productIndex];
-        if (!product || product.images.length === 0) return;
-        currentViewerImages = product.images;
-        currentViewerIndex = 0;
-        currentProductIndex = productIndex;
-        updateImageViewer();
-        imageViewerModal.classList.add('show');
-    }
     function updateImageViewer() {
         largeProductImage.src = currentViewerImages[currentViewerIndex];
         largeProductImage.classList.remove('zoomed'); 
         document.getElementById('imageViewerContent').scrollTo(0, 0); 
-        viewerPrev.disabled = currentViewerIndex === 0;
-        viewerNext.disabled = currentViewerIndex === currentViewerImages.length - 1;
         viewerPrev.style.display = currentViewerImages.length > 1 ? 'block' : 'none';
         viewerNext.style.display = currentViewerImages.length > 1 ? 'block' : 'none';
     }
-    function navigateViewer(direction) {
-        let newIndex = currentViewerIndex + direction;
-        if (newIndex >= 0 && newIndex < currentViewerImages.length) {
-            currentViewerIndex = newIndex;
-            updateImageViewer();
-        }
-    }
-    viewerPrev.onclick = () => navigateViewer(-1);
-    viewerNext.onclick = () => navigateViewer(1);
-    largeProductImage.onclick = (e) => {
-        largeProductImage.classList.toggle('zoomed');
-        const content = document.getElementById('imageViewerContent');
-        content.style.overflow = largeProductImage.classList.contains('zoomed') ? 'scroll' : 'hidden';
-        if (largeProductImage.classList.contains('zoomed')) {
-            const rect = largeProductImage.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            content.scrollTo(x * 1.5 - content.clientWidth / 2, y * 1.5 - content.clientHeight / 2);
-        }
-    };
-    let touchstartX = 0;
-    let touchendX = 0;
-    document.getElementById('imageViewerContent').addEventListener('touchstart', e => {
-        touchstartX = e.changedTouches[0].screenX;
-        largeProductImage.style.transition = 'none'; 
-    });
-    document.getElementById('imageViewerContent').addEventListener('touchend', e => {
-        touchendX = e.changedTouches[0].screenX;
-        largeProductImage.style.transition = 'transform 0.3s ease-in-out';
-        handleGesture();
-    });
-    function handleGesture() {
-        const swipeThreshold = 50;
-        if (touchendX < touchstartX - swipeThreshold) {
-            navigateViewer(1); 
-        }
-        if (touchendX > touchstartX + swipeThreshold) {
-            navigateViewer(-1); 
-        }
-    }
-    // --- PRODUCT CLICK HANDLERS (FIXED: data-product-index -> data-productIndex) ---
+    viewerPrev.onclick = () => { if(currentViewerIndex > 0) currentViewerIndex--; updateImageViewer(); };
+    viewerNext.onclick = () => { if(currentViewerIndex < currentViewerImages.length - 1) currentViewerIndex++; updateImageViewer(); };
+    largeProductImage.onclick = () => { largeProductImage.classList.toggle('zoomed'); };
+
     document.querySelectorAll('.card').forEach(card=>{
       const name=card.dataset.name;
       const description = card.dataset.description;
       const productIndex = Number(card.querySelector('img').dataset.productIndex); 
-
-      card.querySelector('img').addEventListener('click', () => {
-          openImageViewer(productIndex);
-      });
       
-      if(card.querySelector('.buy')&&!card.classList.contains('mtn-card')){
-        card.querySelector('.buy').addEventListener('click',()=>{
-          let item = cart.find(i => i.name === name);
-          const price=Number(card.dataset.price||0);
-          if (item) {
-            item.qty++;
-          } else {
-            cart.push({name,price,qty:1});
+      card.querySelector('img').onclick = () => {
+          if(allProductsData[productIndex]) {
+             currentViewerImages = allProductsData[productIndex].images;
+             currentViewerIndex = 0;
+             updateImageViewer();
+             imageViewerModal.classList.add('show');
           }
+      };
+      
+      if(card.querySelector('.buy') && !card.classList.contains('mtn-card')){
+        card.querySelector('.buy').onclick=()=>{
+          let item = cart.find(i => i.name === name);
+          if (item) item.qty++; else cart.push({name,price:Number(card.dataset.price||0),qty:1});
           renderCart();
           document.getElementById('cartModal').classList.add('show');
-        });
+        };
       }
-      
       if(card.querySelector('.details')){
-        card.querySelector('.details').addEventListener('click',()=>{
+        card.querySelector('.details').onclick=()=>{
           document.getElementById('detailsTitle').textContent=name;
           document.getElementById('detailsDescription').textContent=description; 
           document.getElementById('detailsModal').classList.add('show');
-        });
+        };
       }
     });
 
-
-    // Order ID generator
     function generateOrderId(type="ORD"){
       const d=new Date();
       return `${type}-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.floor(Math.random()*900+100)}`;
     }
 
-    // === FINAL PAYSTACK CHECKOUT (NORMAL CART) ===
-    document.getElementById('checkoutBtn').onclick= async () => {
-      // 1. Critical Authentication Check
-      if(!authEnabled){ alert('Payment failed: Authentication system is down. Please check console for Firebase errors.'); return; }
-      if(!auth.currentUser){ alert('Please Sign In or Sign Up before checking out.'); return; } 
-      if(cart.length===0){alert('Cart empty! Please add items before checking out.'); return;}
+    // === PAYMENT HANDLER WITH SAFE LOADER ===
+    async function handlePayment(email, amount, orderId, metadata, onSuccessCallback) {
+        // 1. Force load script
+        let paystackPop;
+        try {
+            paystackPop = await loadPaystackScript();
+        } catch (error) {
+            alert(error.message); // Alert the user about network error
+            return;
+        }
+
+        // 2. Setup Handler (Safe access)
+        const handler = paystackPop.setup({
+            key: PAYSTACK_PUBLIC_KEY,
+            email: email,
+            amount: amount * 100, // Convert to kobo
+            currency: 'GHS',
+            ref: orderId,
+            metadata: metadata,
+            callback: onSuccessCallback,
+            onClose: () => alert('Payment cancelled.'),
+            onError: (err) => alert('Paystack Error: ' + JSON.stringify(err))
+        });
+        handler.openIframe();
+    }
+
+
+    // === CHECKOUT BUTTON ===
+    document.getElementById('checkoutBtn').onclick = async function() {
+      const btn = this;
+      if(!authEnabled || !auth.currentUser){ alert('Please Sign In first.'); return; } 
+      if(cart.length===0){alert('Cart empty!'); return;}
       
       const name=document.getElementById('custName').value.trim();
       const phone=document.getElementById('custPhone').value.trim();
       const email=document.getElementById('custEmail').value.trim();
       const total=Number(cartTotal.textContent);
       
-      // 2. Input Validation
-      if(!name||!phone||!email||email===DEFAULT_USER_EMAIL){alert('Fill in your Name, Phone number, and a correct Email before proceeding to payment.'); return;}
-      if(total<=0){alert('The cart total must be greater than zero to proceed to payment.'); return;}
+      if(!name||!phone||!email){alert('Please fill all details.'); return;}
 
-      const orderId=generateOrderId("ORD");
-      const userId = auth.currentUser.uid; 
+      btn.textContent = "Processing..."; btn.disabled = true;
+      const orderId = generateOrderId("ORD");
+      const userId = auth.currentUser.uid;
 
-      // 3. LOAD PAYSTACK & START
-      try {
-          await loadPaystack(); // Wait for script to load
-      } catch (e) {
-          alert("Could not load payment system. Please check your internet connection.");
-          return;
-      }
-
-      const handler = window.PaystackPop.setup({
-        key:PAYSTACK_PUBLIC_KEY, 
-        email:email, 
-        amount:total*100, // Amount in Kobo/Pesewas
-        currency:'GHS',
-        ref: orderId, // Use Order ID as reference
-        callback:async res=>{
+      await handlePayment(email, total, orderId, {}, async (res) => {
+          // Success
           try {
-              // Only attempt Firebase operation if initialization succeeded
-              const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-              
-              await addDoc(collection(db,'orders'),{
-                  orderId, userId, customerName:name, customerPhone:phone, customerEmail:email,
-                  items:cart, totalAmount:total, status:'Paid - Pending Fulfillment', reference:res.reference, timestamp:serverTimestamp()
-              });
-              alert('Payment successful! Order ID: '+orderId);
-              // Cleanup
-              cart=[]; renderCart(); 
-              document.getElementById('cartModal').classList.remove('show');
-              document.getElementById('custName').value=''; 
-              document.getElementById('custPhone').value=''; 
-              document.getElementById('custEmail').value=auth.currentUser.email; // Reset to authenticated email
-
-          } catch (error) {
-              console.error("Firebase Order Logging Error:", error);
-              alert('Payment successful but failed to log order in database. Contact support with Paystack Ref: '+res.reference);
-          }
-        },
-        onClose:()=>alert('Payment cancelled or closed.'),
-        onError: (error) => {
-            console.error("Paystack Error:", error);
-            alert(`Payment Initialization Failed. Error: ${error.message || 'Check console (F12) for details and ensure no pop-up blockers are active.'}`);
-        }
+            const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+            await addDoc(collection(db,'orders'),{
+                orderId, userId, customerName:name, customerPhone:phone, customerEmail:email,
+                items:cart, totalAmount:total, status:'Paid', reference:res.reference, timestamp:serverTimestamp()
+            });
+            alert('Payment successful! Order ID: '+orderId);
+            cart=[]; renderCart(); document.getElementById('cartModal').classList.remove('show');
+          } catch(e) { console.error(e); alert('Payment successful but db log failed.'); }
+          finally { btn.textContent = "Checkout & Pay"; btn.disabled = false; }
       });
-      handler.openIframe();
+      // If window closed without payment, reset button
+      setTimeout(() => { btn.textContent = "Checkout & Pay"; btn.disabled = false; }, 5000);
     };
 
-    // MTN Bundles logic
+    // === MTN BUNDLES ===
     let selectedMTNPrice=5.5, selectedMTNBundle="1GB";
     document.querySelector('.mtn-bundles button').classList.add('selected');
-
     document.querySelectorAll('.mtn-bundles button').forEach(btn=>{
-      btn.addEventListener('click',()=>{
+      btn.onclick=()=>{
         document.querySelectorAll('.mtn-bundles button').forEach(b=>b.classList.remove('selected'));
         btn.classList.add('selected');
         selectedMTNPrice=Number(btn.dataset.price);
         selectedMTNBundle=btn.textContent.split('–')[0].trim();
-      });
+      };
     });
     document.getElementById('mtnOpenBtn').onclick=()=>document.getElementById('mtnModal').classList.add('show');
 
-    // === FINAL PAYSTACK CHECKOUT (MTN BUNDLE) ===
-    document.getElementById('mtnPay').onclick= async () => {
-      // 1. Critical Authentication Check
-      if(!authEnabled){ alert('Payment failed: Authentication system is down. Please check console for Firebase errors.'); return; }
-      if(!auth.currentUser){ alert('Please Sign In or Sign Up before buying a bundle.'); return; } 
-
+    document.getElementById('mtnPay').onclick = async function() {
+      const btn = this;
+      if(!authEnabled || !auth.currentUser){ alert('Please Sign In first.'); return; } 
       const number=document.getElementById('mtnNumber').value.trim();
       const name=document.getElementById('mtnName').value.trim();
       const email=document.getElementById('mtnEmail').value.trim();
       
-      // 2. Input Validation
-      if(!number||!name||!email||email===DEFAULT_USER_EMAIL){alert('Fill in the MTN Number, your Name, and a correct Email before proceeding to payment.'); return;}
-      if(selectedMTNPrice<=0){alert('Please select a valid bundle amount to proceed to payment.'); return;}
-      if(number.length !== 10 || !number.startsWith('0')){alert('Please enter a valid 10-digit MTN number (e.g., 054xxxxxxx).'); return;}
+      if(!number||!name||!email){alert('Please fill all details.'); return;}
+      if(number.length !== 10){alert('Invalid MTN number.'); return;}
 
-      const orderId=generateOrderId("MTN");
-      const userId = auth.currentUser.uid; 
+      btn.textContent = "Processing..."; btn.disabled = true;
+      const orderId = generateOrderId("MTN");
+      const userId = auth.currentUser.uid;
 
-      // 3. LOAD PAYSTACK & START
-      try {
-          await loadPaystack(); // Wait for script to load
-      } catch (e) {
-          alert("Could not load payment system. Please check your internet connection.");
-          return;
-      }
-
-      const handler=window.PaystackPop.setup({
-        key:PAYSTACK_PUBLIC_KEY, 
-        email:email, 
-        amount:selectedMTNPrice*100, // Amount in Kobo/Pesewas
-        currency:'GHS',
-        ref: orderId, // Use Order ID as reference
-        metadata:{
-            custom_fields:[
-                {display_name:'MTN Number', variable_name:'mtn_number', value:number},
-                {display_name:'Bundle', variable_name:'bundle_type', value:selectedMTNBundle}
-            ]
-        },
-        callback:async res=>{
+      await handlePayment(email, selectedMTNPrice, orderId, {
+          custom_fields: [{display_name:'MTN Number', variable_name:'mtn_number', value:number}]
+      }, async (res) => {
           try {
-              // Only attempt Firebase operation if initialization succeeded
               const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-              
               await addDoc(collection(db,'mtn_orders'),{
                   orderId, userId, customerName:name, customerPhone:number, customerEmail:email,
-                  bundle:selectedMTNBundle, amount:selectedMTNPrice, status:'Paid - Pending Bundle Send', reference:res.reference, timestamp:serverTimestamp()
+                  bundle:selectedMTNBundle, amount:selectedMTNPrice, status:'Paid', reference:res.reference, timestamp:serverTimestamp()
               });
-              alert('MTN payment successful! Order ID: '+orderId);
-              // Cleanup
+              alert('MTN Bundle Purchased! Order ID: '+orderId);
               document.getElementById('mtnModal').classList.remove('show');
-              document.getElementById('mtnNumber').value=''; 
-              document.getElementById('mtnName').value=''; 
-              document.getElementById('mtnEmail').value=auth.currentUser.email; // Reset to authenticated email
-          } catch (error) {
-              console.error("Firebase MTN Order Logging Error:", error);
-              alert('Payment successful but failed to log MTN order in database. Contact support with Paystack Ref: '+res.reference);
-          }
-        },
-        onClose:()=>alert('Payment cancelled or closed.'),
-        onError: (error) => {
-            console.error("Paystack Error:", error);
-            alert(`Payment Initialization Failed. Error: ${error.message || 'Check console (F12) for details and ensure no pop-up blockers are active.'}`);
-        }
+          } catch(e) { console.error(e); alert('Payment successful but db log failed.'); }
+          finally { btn.textContent = "Pay for Bundle"; btn.disabled = false; }
       });
-      handler.openIframe();
+      setTimeout(() => { btn.textContent = "Pay for Bundle"; btn.disabled = false; }, 5000);
     };
-
-    // WhatsApp Order Handler 
+    
+    // WhatsApp Order Handler
     const orderBtnHandler = document.createElement('button');
-    orderBtnHandler.id = 'orderBtn_handler';
-    orderBtnHandler.style.display = 'none';
+    orderBtnHandler.id = 'orderBtn_handler'; orderBtnHandler.style.display = 'none';
     document.body.appendChild(orderBtnHandler);
-
     orderBtnHandler.onclick=()=>{
-      // Note: This check uses the global authentication state
-      if(!authEnabled || !auth.currentUser){ alert('Please Sign In or Sign Up before confirming an order via WhatsApp.'); return; }
-      if(cart.length===0){alert('Your cart is empty. Please add items before confirming an order.'); return;}
-      
-      let total = 0;
-      let itemsList = '';
-      cart.forEach((i, index)=>{
-        const subtotal = i.price * i.qty;
-        itemsList += `\n*${index + 1}.* ${i.name}`;
-        itemsList += `\n   \u2022 Quantity: ${i.qty}`;
-        itemsList += `\n   \u2022 Price per item: ₵${i.price}`;
-        itemsList += `\n   \u2022 Subtotal: ₵${subtotal}`;
-        total += subtotal;
-      });
-      
-      let message=`Hello Luxe Store! I am confirming my order details for manual processing.\n\n*Account Email:* ${auth.currentUser.email}\n\n*--- ORDER SUMMARY ---*${itemsList}\n\n*GRAND TOTAL: ₵${total}*\n\n*--- CUSTOMER & DELIVERY DETAILS ---*
-    Please use the following information for my delivery:
-    \n\u2022 *Full Name:* [ENTER YOUR FULL NAME]
-    \n\u2022 *Phone Number:* [ENTER YOUR ACTIVE PHONE NUMBER]
-    \n\u2022 *Delivery Location:* [ENTER YOUR TOWN, STREET NAME, AND NEAREST LANDMARK]
-    \n\nPlease reply to confirm the order and delivery charge. Thank you!`;
-      
-      const whatsappUrl = `https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=${encodeURIComponent(message)}`; 
-      window.open(whatsappUrl, '_blank');
+        if(!authEnabled || !auth.currentUser){ alert('Please Sign In first.'); return; }
+        if(cart.length===0){alert('Cart empty!'); return;}
+        let msg = `New Order Request:\nEmail: ${auth.currentUser.email}\n`;
+        cart.forEach(i=> msg += `${i.name} (x${i.qty})\n`);
+        window.open(`https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
     };
 }
-
-
-// We run the DOM handlers once the page content is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    // This is mostly a fallback/marker. The real initialization is handled by the IIAF above.
-});
 </script>
 </body>
 </html>
