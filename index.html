@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Luxe Store</title>
-<script src="https://js.paystack.co/v1/inline.js"></script> 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
@@ -253,13 +252,29 @@ body.dark #sideMenu #supportBtn_menu { background: #444; color: #fff; }
 </div>
 
 <script type="module">
-// --- GLOBAL PAYSTACK CONFIGURATION ---
+// --- GLOBAL CONFIGURATION ---
 const PAYSTACK_PUBLIC_KEY = 'pk_live_98575428080557d261e91cb92fe745f878fc4278';
 const CUSTOMER_SERVICE_NUMBER = '233548164533'; 
-const DEFAULT_USER_EMAIL = 'support@luxestore.com'; 
+const DEFAULT_USER_EMAIL = 'jbellingham771@gmail.com'; 
 
 let cart = [];
 let allProductsData = []; 
+
+// --- CRITICAL: DYNAMIC PAYSTACK LOADER ---
+// This function ensures Paystack is loaded BEFORE we try to use it.
+function loadPaystack() {
+    return new Promise((resolve, reject) => {
+        if (window.PaystackPop) {
+            resolve(window.PaystackPop);
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://js.paystack.co/v1/inline.js';
+        script.onload = () => resolve(window.PaystackPop);
+        script.onerror = () => reject(new Error('Failed to load Paystack script'));
+        document.head.appendChild(script);
+    });
+}
 
 // --- CRITICAL: FIREBASE SETUP AND GLOBAL VARIABLE EXPOSURE ---
 let app, db, auth;
@@ -267,16 +282,13 @@ let firebaseInitialized = false;
 
 // We use an immediately invoked async function (IIAF) to handle imports cleanly
 (async () => {
-    // 1. Wait for DOM to load fully before running any script logic
-    await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
-
     try {
-        // 2. Core Firebase Imports (must be done in a module)
+        // 1. Core Firebase Imports
         const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
         const { getFirestore, collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
         const { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"); 
 
-        // === 3. FIREBASE CONFIGURATION ===
+        // === 1. FIREBASE CONFIGURATION ===
         const firebaseConfig = {
           apiKey: "AIzaSyA6WtaQD8tqriy9_WIBV3DxV9vcKzvNSdI", 
           authDomain: "luxe-datastore.firebaseapp.com",
@@ -291,9 +303,9 @@ let firebaseInitialized = false;
         db = getFirestore(app);
         auth = getAuth(app); 
         firebaseInitialized = true;
-        console.log("Firebase services initialized successfully and exposed.");
+        console.log("Firebase services initialized successfully.");
 
-        // 4. ATTACH AUTH LISTENERS
+        // 2. RUN AUTH LISTENERS HERE (Where 'auth' is guaranteed to be defined)
         const authModal = document.getElementById('authModal');
         const logoutBtnMenu = document.getElementById('logoutBtn_menu'); 
         
@@ -301,6 +313,7 @@ let firebaseInitialized = false;
             if (user) {
                 authModal.classList.remove('show');
                 logoutBtnMenu.style.display = 'block'; 
+                // Automatically populate email fields
                 document.getElementById('custEmail').value = user.email;
                 document.getElementById('mtnEmail').value = user.email;
             } else {
@@ -311,7 +324,7 @@ let firebaseInitialized = false;
             }
         });
 
-        // 5. ATTACH AUTH BUTTON LOGIC
+        // 3. ATTACH AUTH BUTTON LOGIC (Guaranteed 'auth' is defined)
         const authEmail = document.getElementById('authEmail');
         const authPassword = document.getElementById('authPassword');
         const signInBtn = document.getElementById('signInBtn');
@@ -342,6 +355,7 @@ let firebaseInitialized = false;
             }
         };
 
+        // Attach Logout
         document.getElementById('logoutBtn_menu').onclick = async () => {
             try {
                 await signOut(auth);
@@ -352,19 +366,19 @@ let firebaseInitialized = false;
             }
         };
         
-        // 6. INITIALIZE ALL OTHER DOM/CART/PAYMENT HANDLERS (Now that auth is defined)
+        // Finalize DOM operations dependent on initialization success
         initializeDOMHandlers(true);
 
     } catch (error) {
         console.error("CRITICAL: Firebase initialization or Auth setup failed. Error:", error);
-        alert("CRITICAL ERROR: Failed to connect or set up Firebase Authentication/Services. Check the console (F12) for details.");
-        // Fallback: Initialize non-auth handlers only
+        alert("CRITICAL ERROR: Failed to connect or set up Firebase Authentication. Check the console (F12) for details.");
+        // If Firebase fails, still initialize the non-Firebase handlers
         initializeDOMHandlers(false);
     }
 })();
 
 
-// --- DOM HANDLERS (Called only after DOM is ready AND Firebase initialization attempt is complete) ---
+// --- DOM HANDLERS (Runs regardless of Firebase success) ---
 function initializeDOMHandlers(authEnabled) {
     
     // --- DATA INITIALIZATION ---
@@ -409,6 +423,7 @@ function initializeDOMHandlers(authEnabled) {
         toggleMenu();
     };
 
+    // --- SUPPORT BUTTON (Non-Firebase) ---
     document.getElementById('supportBtn_menu').onclick = () => {
         let message = 'Hello Luxe Store Customer Service, I need assistance with my order/query.';
         const whatsappUrl = `https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=${encodeURIComponent(message)}`; 
@@ -507,7 +522,7 @@ function initializeDOMHandlers(authEnabled) {
             navigateViewer(-1); 
         }
     }
-    // --- PRODUCT CLICK HANDLERS ---
+    // --- PRODUCT CLICK HANDLERS (FIXED: data-product-index -> data-productIndex) ---
     document.querySelectorAll('.card').forEach(card=>{
       const name=card.dataset.name;
       const description = card.dataset.description;
@@ -547,10 +562,11 @@ function initializeDOMHandlers(authEnabled) {
       return `${type}-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.floor(Math.random()*900+100)}`;
     }
 
-    // === PAYSTACK CHECKOUT (NORMAL CART) ===
-    document.getElementById('checkoutBtn').onclick=()=>{
-      if(typeof PaystackPop === 'undefined') { alert('Payment failed: Paystack library failed to load. Please check your internet connection.'); return; }
-      if(!authEnabled || !auth.currentUser){ alert('Please Sign In or Sign Up before checking out.'); return; } 
+    // === FINAL PAYSTACK CHECKOUT (NORMAL CART) ===
+    document.getElementById('checkoutBtn').onclick= async () => {
+      // 1. Critical Authentication Check
+      if(!authEnabled){ alert('Payment failed: Authentication system is down. Please check console for Firebase errors.'); return; }
+      if(!auth.currentUser){ alert('Please Sign In or Sign Up before checking out.'); return; } 
       if(cart.length===0){alert('Cart empty! Please add items before checking out.'); return;}
       
       const name=document.getElementById('custName').value.trim();
@@ -558,30 +574,53 @@ function initializeDOMHandlers(authEnabled) {
       const email=document.getElementById('custEmail').value.trim();
       const total=Number(cartTotal.textContent);
       
+      // 2. Input Validation
       if(!name||!phone||!email||email===DEFAULT_USER_EMAIL){alert('Fill in your Name, Phone number, and a correct Email before proceeding to payment.'); return;}
       if(total<=0){alert('The cart total must be greater than zero to proceed to payment.'); return;}
 
       const orderId=generateOrderId("ORD");
       const userId = auth.currentUser.uid; 
 
-      const handler=PaystackPop.setup({
+      // 3. LOAD PAYSTACK & START
+      try {
+          await loadPaystack(); // Wait for script to load
+      } catch (e) {
+          alert("Could not load payment system. Please check your internet connection.");
+          return;
+      }
+
+      const handler = window.PaystackPop.setup({
         key:PAYSTACK_PUBLIC_KEY, 
         email:email, 
-        amount:total*100, 
+        amount:total*100, // Amount in Kobo/Pesewas
         currency:'GHS',
+        ref: orderId, // Use Order ID as reference
         callback:async res=>{
-          await addDoc(collection(db,'orders'),{
-            orderId, userId, customerName:name, customerPhone:phone, customerEmail:email,
-            items:cart, totalAmount:total, status:'Paid - Pending Fulfillment', reference:res.reference, timestamp:serverTimestamp()
-          });
-          alert('Payment successful! Order ID: '+orderId);
-          cart=[]; renderCart(); document.getElementById('cartModal').classList.remove('show');
-          document.getElementById('custName').value=''; document.getElementById('custPhone').value=''; document.getElementById('custEmail').value=auth.currentUser.email; 
+          try {
+              // Only attempt Firebase operation if initialization succeeded
+              const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+              
+              await addDoc(collection(db,'orders'),{
+                  orderId, userId, customerName:name, customerPhone:phone, customerEmail:email,
+                  items:cart, totalAmount:total, status:'Paid - Pending Fulfillment', reference:res.reference, timestamp:serverTimestamp()
+              });
+              alert('Payment successful! Order ID: '+orderId);
+              // Cleanup
+              cart=[]; renderCart(); 
+              document.getElementById('cartModal').classList.remove('show');
+              document.getElementById('custName').value=''; 
+              document.getElementById('custPhone').value=''; 
+              document.getElementById('custEmail').value=auth.currentUser.email; // Reset to authenticated email
+
+          } catch (error) {
+              console.error("Firebase Order Logging Error:", error);
+              alert('Payment successful but failed to log order in database. Contact support with Paystack Ref: '+res.reference);
+          }
         },
         onClose:()=>alert('Payment cancelled or closed.'),
         onError: (error) => {
             console.error("Paystack Error:", error);
-            alert(`Payment Initialization Failed. Error: ${error.message || 'Check console for details and pop-up blockers.'}`);
+            alert(`Payment Initialization Failed. Error: ${error.message || 'Check console (F12) for details and ensure no pop-up blockers are active.'}`);
         }
       });
       handler.openIframe();
@@ -601,14 +640,17 @@ function initializeDOMHandlers(authEnabled) {
     });
     document.getElementById('mtnOpenBtn').onclick=()=>document.getElementById('mtnModal').classList.add('show');
 
-    // === PAYSTACK CHECKOUT (MTN BUNDLE) ===
-    document.getElementById('mtnPay').onclick=()=>{
-      if(typeof PaystackPop === 'undefined') { alert('Payment failed: Paystack library failed to load. Please check your internet connection.'); return; }
-      if(!authEnabled || !auth.currentUser){ alert('Please Sign In or Sign Up before buying a bundle.'); return; } 
+    // === FINAL PAYSTACK CHECKOUT (MTN BUNDLE) ===
+    document.getElementById('mtnPay').onclick= async () => {
+      // 1. Critical Authentication Check
+      if(!authEnabled){ alert('Payment failed: Authentication system is down. Please check console for Firebase errors.'); return; }
+      if(!auth.currentUser){ alert('Please Sign In or Sign Up before buying a bundle.'); return; } 
+
       const number=document.getElementById('mtnNumber').value.trim();
       const name=document.getElementById('mtnName').value.trim();
       const email=document.getElementById('mtnEmail').value.trim();
       
+      // 2. Input Validation
       if(!number||!name||!email||email===DEFAULT_USER_EMAIL){alert('Fill in the MTN Number, your Name, and a correct Email before proceeding to payment.'); return;}
       if(selectedMTNPrice<=0){alert('Please select a valid bundle amount to proceed to payment.'); return;}
       if(number.length !== 10 || !number.startsWith('0')){alert('Please enter a valid 10-digit MTN number (e.g., 054xxxxxxx).'); return;}
@@ -616,11 +658,20 @@ function initializeDOMHandlers(authEnabled) {
       const orderId=generateOrderId("MTN");
       const userId = auth.currentUser.uid; 
 
-      const handler=PaystackPop.setup({
+      // 3. LOAD PAYSTACK & START
+      try {
+          await loadPaystack(); // Wait for script to load
+      } catch (e) {
+          alert("Could not load payment system. Please check your internet connection.");
+          return;
+      }
+
+      const handler=window.PaystackPop.setup({
         key:PAYSTACK_PUBLIC_KEY, 
         email:email, 
-        amount:selectedMTNPrice*100, 
+        amount:selectedMTNPrice*100, // Amount in Kobo/Pesewas
         currency:'GHS',
+        ref: orderId, // Use Order ID as reference
         metadata:{
             custom_fields:[
                 {display_name:'MTN Number', variable_name:'mtn_number', value:number},
@@ -628,18 +679,29 @@ function initializeDOMHandlers(authEnabled) {
             ]
         },
         callback:async res=>{
-          await addDoc(collection(db,'mtn_orders'),{
-            orderId, userId, customerName:name, customerPhone:number, customerEmail:email,
-            bundle:selectedMTNBundle, amount:selectedMTNPrice, status:'Paid - Pending Bundle Send', reference:res.reference, timestamp:serverTimestamp()
-          });
-          alert('MTN payment successful! Order ID: '+orderId);
-          document.getElementById('mtnModal').classList.remove('show');
-          document.getElementById('mtnNumber').value=''; document.getElementById('mtnName').value=''; document.getElementById('mtnEmail').value=auth.currentUser.email; 
+          try {
+              // Only attempt Firebase operation if initialization succeeded
+              const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+              
+              await addDoc(collection(db,'mtn_orders'),{
+                  orderId, userId, customerName:name, customerPhone:number, customerEmail:email,
+                  bundle:selectedMTNBundle, amount:selectedMTNPrice, status:'Paid - Pending Bundle Send', reference:res.reference, timestamp:serverTimestamp()
+              });
+              alert('MTN payment successful! Order ID: '+orderId);
+              // Cleanup
+              document.getElementById('mtnModal').classList.remove('show');
+              document.getElementById('mtnNumber').value=''; 
+              document.getElementById('mtnName').value=''; 
+              document.getElementById('mtnEmail').value=auth.currentUser.email; // Reset to authenticated email
+          } catch (error) {
+              console.error("Firebase MTN Order Logging Error:", error);
+              alert('Payment successful but failed to log MTN order in database. Contact support with Paystack Ref: '+res.reference);
+          }
         },
         onClose:()=>alert('Payment cancelled or closed.'),
         onError: (error) => {
             console.error("Paystack Error:", error);
-            alert(`Payment Initialization Failed. Error: ${error.message || 'Check console for details and pop-up blockers.'}`);
+            alert(`Payment Initialization Failed. Error: ${error.message || 'Check console (F12) for details and ensure no pop-up blockers are active.'}`);
         }
       });
       handler.openIframe();
@@ -652,6 +714,7 @@ function initializeDOMHandlers(authEnabled) {
     document.body.appendChild(orderBtnHandler);
 
     orderBtnHandler.onclick=()=>{
+      // Note: This check uses the global authentication state
       if(!authEnabled || !auth.currentUser){ alert('Please Sign In or Sign Up before confirming an order via WhatsApp.'); return; }
       if(cart.length===0){alert('Your cart is empty. Please add items before confirming an order.'); return;}
       
@@ -677,6 +740,12 @@ function initializeDOMHandlers(authEnabled) {
       window.open(whatsappUrl, '_blank');
     };
 }
+
+
+// We run the DOM handlers once the page content is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // This is mostly a fallback/marker. The real initialization is handled by the IIAF above.
+});
 </script>
 </body>
 </html>
