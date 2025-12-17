@@ -8,7 +8,7 @@
 
 <style>
 /* CSS STYLES */
-:root{--gold:#b8860b;--silver:#c0c0c0}
+:root{--gold:#b8860b;--silver:#c0c0c0; --green:#2ecc71; --red:#e74c3c;}
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif;}
 body{background:#fff8f0;color:#333;transition:.3s}
 body.dark{background:#111;color:#fff}
@@ -20,14 +20,22 @@ body.dark header{background:linear-gradient(90deg,#444,#666,#999)}
 .welcome-message { font-size: 0.9rem; margin-top: 4px; color: #555; font-family: 'Playfair Display', serif; font-style: italic;}
 body.dark .welcome-message { color: #ccc; }
 .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:16px}
-.card{background:#fff;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.2);overflow:hidden;transition:.3s}
+.card{background:#fff;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.2);overflow:hidden;transition:.3s; position: relative;}
 body.dark .card{background:#222}
 .card img{width:100%;height:180px;object-fit:cover; cursor: pointer;} 
 .card-body{text-align:center;padding:10px}
 .price{font-weight:bold;color:var(--silver)}
+
+/* NEW STOCK STYLES */
+.stock-display { font-size: 0.85rem; margin: 5px 0; font-weight: bold; }
+.in-stock { color: var(--green); }
+.low-stock { color: #f39c12; }
+.out-of-stock { color: var(--red); }
+
 .buttons{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .buttons button{flex:1 1 45%;padding:8px;border:none;border-radius:10px;font-weight:bold;cursor:pointer}
 .buy{background:var(--gold);color:#fff}
+.buy:disabled { background: #ccc; cursor: not-allowed; } /* Style for Sold Out button */
 .details{background:#c0c0c0}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);align-items:center;justify-content:center;z-index:1000}
 .modal.show{display:flex}
@@ -101,53 +109,63 @@ body.dark #sideMenu #supportBtn_menu { background: #444; color: #fff; }
     <div class="header-content"> 
         <img src="images/luxe_logo.png" alt="Luxe Store Logo" class="header-logo"> 
         <h1>Luxe Store</h1>
-        <p class="welcome-message" style="color: red; font-weight: bold;">🎄 Christmas Flash Sale! 5% OFF Everything!🎄"CONFIRM ORDER BEFORE PAYMENT PLEASE!!"</p>
+        <p class="welcome-message" style="color: red; font-weight: bold;">🎄 Christmas Flash Sale! 5% OFF Everything! 🎄</p>
     </div>
     <div style="width: 24px; margin-right: 15px;"></div> 
 </header>
 
 <div class="products">
-    <div class="card" data-name="Silver Crest Blender 2in1 2.0L" data-price="285" data-images="images/blender.jpg,images/blenders.jpg,images/blender2.jpg" data-description="Powerful 2.0L blender with stainless steel blades. Crushes ice, blends smoothies, and grinds spices effortlessly with its versatile 2-in-1 design.">
+    <div class="card" id="card_blender" data-id="blender" data-name="Silver Crest Blender 2in1 2.0L" data-price="285" data-images="images/blender.jpg,images/blenders.jpg,images/blender2.jpg" data-description="Powerful 2.0L blender with stainless steel blades.">
         <img src="images/blender.jpg" data-product-index="0">
         <div class="card-body">
             <h3>Silver Crest Blender 2-in1- 2.0L</h3>
             <p class="price"><span style="text-decoration: line-through; color: #888; font-size: 0.9em; margin-right: 5px;">₵300</span> ₵285</p>
-            <div class="buttons"><button class="buy">Add to Cart</button><button class="details">More Details</button></div>
+            <p class="stock-display" id="stock_blender">Checking stock...</p>
+            <div class="buttons"><button class="buy" id="btn_blender">Add to Cart</button><button class="details">More Details</button></div>
         </div>
     </div>
-    <div class="card" data-name="Superbass 2-in-1 Earphones" data-price="61.75" data-images="images/headphones.jpg,images/headphones1.jpg" data-description="High-fidelity audio with deep bass. These 2-in-1 earphones switch easily between wired audio and a convenient wireless neckband for active use.">
+    
+    <div class="card" id="card_earphones" data-id="earphones" data-name="Superbass 2-in-1 Earphones" data-price="61.75" data-images="images/headphones.jpg,images/headphones1.jpg" data-description="High-fidelity audio with deep bass.">
         <img src="images/headphones.jpg" data-product-index="1">
         <div class="card-body">
             <h3>Superbass 2-in-1 Earphones</h3>
             <p class="price"><span style="text-decoration: line-through; color: #888; font-size: 0.9em; margin-right: 5px;">₵65</span> ₵61.75</p>
-            <div class="buttons"><button class="buy">Add to Cart</button><button class="details">More Details</button></div>
+            <p class="stock-display" id="stock_earphones">Checking stock...</p>
+            <div class="buttons"><button class="buy" id="btn_earphones">Add to Cart</button><button class="details">More Details</button></div>
         </div>
     </div>
-    <div class="card" data-name="Rich Ripple Smart Watch" data-price="190" data-images="images/smartwatch.jpg,images/smartwatch1.jpg" data-description="Sleek smart watch with a vibrant display. Tracks heart rate, sleep, and steps. Receive smartphone notifications and enjoy long battery life.">
+    
+    <div class="card" id="card_watch" data-id="watch" data-name="Rich Ripple Smart Watch" data-price="190" data-images="images/smartwatch.jpg,images/smartwatch1.jpg" data-description="Sleek smart watch with a vibrant display.">
         <img src="images/smartwatch.jpg" data-product-index="2">
         <div class="card-body">
             <h3>Rich Ripple Smart Watch</h3>
             <p class="price"><span style="text-decoration: line-through; color: #888; font-size: 0.9em; margin-right: 5px;">₵200</span> ₵190</p>
-            <div class="buttons"><button class="buy">Add to Cart</button><button class="details">More Details</button></div>
+            <p class="stock-display" id="stock_watch">Checking stock...</p>
+            <div class="buttons"><button class="buy" id="btn_watch">Add to Cart</button><button class="details">More Details</button></div>
         </div>
     </div>
-    <div class="card" data-name="3-in-1 60W USB Cable" data-price="47.5" data-images="images/accessories.jpg,images/accessories1.jpg" data-description="Durable, braided cable with 60W fast charging. Includes USB-C, Micro USB, and Lightning connectors in one tangle-free design.">
+    
+    <div class="card" id="card_cable" data-id="cable" data-name="3-in-1 60W USB Cable" data-price="47.5" data-images="images/accessories.jpg,images/accessories1.jpg" data-description="Durable, braided cable with 60W fast charging.">
         <img src="images/accessories.jpg" data-product-index="3">
         <div class="card-body">
             <h3>3-in-1 60W USB Cable</h3>
             <p class="price"><span style="text-decoration: line-through; color: #888; font-size: 0.9em; margin-right: 5px;">₵50</span> ₵47.50</p>
-            <div class="buttons"><button class="buy">Add to Cart</button><button class="details">More Details</button></div>
+            <p class="stock-display" id="stock_cable">Checking stock...</p>
+            <div class="buttons"><button class="buy" id="btn_cable">Add to Cart</button><button class="details">More Details</button></div>
         </div>
     </div>
-    <div class="card" data-name="Oraimo Traveler Powerbank 10000mAh" data-price="190" data-images="images/powerbank.jpg,images/powerbank1.jpg" data-description="Compact 10,000mAh powerbank that offers multiple full charges. Features dual output and fast-charging technology for on-the-go power.">
+    
+    <div class="card" id="card_powerbank" data-id="powerbank" data-name="Oraimo Traveler Powerbank 10000mAh" data-price="190" data-images="images/powerbank.jpg,images/powerbank1.jpg" data-description="Compact 10,000mAh powerbank.">
         <img src="images/powerbank.jpg" data-product-index="4">
         <div class="card-body">
-            <h3>Oraimo Traveler Powerbank 10,000mAh</h3>
+            <h3>Oraimo Traveler Powerbank</h3>
             <p class="price"><span style="text-decoration: line-through; color: #888; font-size: 0.9em; margin-right: 5px;">₵200</span> ₵190</p>
-            <div class="buttons"><button class="buy">Add to Cart</button><button class="details">More Details</button></div>
+            <p class="stock-display" id="stock_powerbank">Checking stock...</p>
+            <div class="buttons"><button class="buy" id="btn_powerbank">Add to Cart</button><button class="details">More Details</button></div>
         </div>
     </div>
-    <div class="card mtn-card" data-name="MTN Data Bundles" data-price="0" data-images="images/databundles.jpg" data-description="Instant MTN data top-ups (1GB to 10GB). Quick delivery (30 mins - 1 hr). Ensure number is correct; non-refundable for wrong numbers.">
+
+    <div class="card mtn-card" data-name="MTN Data Bundles" data-price="0" data-images="images/databundles.jpg" data-description="Instant MTN data top-ups.">
         <img src="images/databundles.jpg" data-product-index="5">
         <div class="card-body">
             <h3>MTN Data Bundles</h3>
@@ -235,68 +253,58 @@ body.dark #sideMenu #supportBtn_menu { background: #444; color: #fff; }
 const PAYSTACK_PUBLIC_KEY = 'pk_live_98575428080557d261e91cb92fe745f878fc4278';
 const CUSTOMER_SERVICE_NUMBER = '233548164533'; 
 const DEFAULT_USER_EMAIL = 'jbellingham771@gmail.com'; 
-const WHATSAPP_GROUP_LINK = 'https://chat.whatsapp.com/GxS4tPlo8sqH8xkbARNvPc'; // ADDED CONST
+const WHATSAPP_GROUP_LINK = 'https://chat.whatsapp.com/GxS4tPlo8sqH8xkbARNvPc';
+
+// --- INVENTORY MANAGEMENT (CHANGE NUMBERS HERE TO UPDATE STOCK) ---
+// If you want to change stock, change the number here and refresh the page.
+const STORE_INVENTORY = {
+    'blender': 20,
+    'earphones': 50,
+    'watch': 15,
+    'cable': 100,
+    'powerbank': 12
+};
 
 let cart = [];
 let allProductsData = []; 
-let PaystackPop; // Global reference for the loaded Paystack object
+let currentStockState = {}; // Keeps track of live stock
+let PaystackPop; 
 
-// --- CRITICAL: SAFE PAYSTACK LOADER ---
 function loadPaystackScript() {
     return new Promise((resolve, reject) => {
-        if (window.PaystackPop) {
-            PaystackPop = window.PaystackPop;
-            resolve(PaystackPop);
-            return;
-        }
-        console.log("Loading Paystack script...");
+        if (window.PaystackPop) { PaystackPop = window.PaystackPop; resolve(PaystackPop); return; }
         const script = document.createElement('script');
         script.src = 'https://js.paystack.co/v1/inline.js';
-        script.onload = () => {
-            if (window.PaystackPop) {
-                PaystackPop = window.PaystackPop;
-                console.log("Paystack script loaded successfully.");
-                resolve(PaystackPop);
-            } else {
-                reject(new Error('Paystack script loaded but PaystackPop object not found. This is a common error on slow networks or if the script is blocked.'));
-            }
-        };
-        script.onerror = () => {
-            console.error("Failed to load Paystack script.");
-            reject(new Error('Network error: Could not load Paystack. Check internet connection.'));
-        };
+        script.onload = () => { if (window.PaystackPop) { PaystackPop = window.PaystackPop; resolve(PaystackPop); } else { reject(new Error('Paystack Error')); } };
+        script.onerror = () => reject(new Error('Network Error'));
         document.head.appendChild(script);
     });
 }
-
 
 // --- FIREBASE SETUP ---
 let app, db, auth;
 let firebaseInitialized = false;
 
-// Async function to handle Firebase imports and authentication
 async function initializeFirebase() {
     try {
-        // Dynamic imports for Firebase
         const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
-        const { getFirestore, collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        const { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, increment, onSnapshot, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
         const { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"); 
 
        const firebaseConfig = {
-  apiKey: "AIzaSyA6WtaQD8tqriy9_WIBV3DxV9vcKzvNSdI",
-  authDomain: "luxe-datastore.firebaseapp.com",
-  databaseURL: "https://luxe-datastore-default-rtdb.firebaseio.com",
-  projectId: "luxe-datastore",
-  storageBucket: "luxe-datastore.firebasestorage.app",
-  messagingSenderId: "337992102686",
-  appId: "1:337992102686:web:91b6d6802686bf688b4f0f"
-}; 
+          apiKey: "AIzaSyA6WtaQD8tqriy9_WIBV3DxV9vcKzvNSdI",
+          authDomain: "luxe-datastore.firebaseapp.com",
+          databaseURL: "https://luxe-datastore-default-rtdb.firebaseio.com",
+          projectId: "luxe-datastore",
+          storageBucket: "luxe-datastore.firebasestorage.app",
+          messagingSenderId: "337992102686",
+          appId: "1:337992102686:web:91b6d6802686bf688b4f0f"
+        }; 
 
         app = initializeApp(firebaseConfig);
         db = getFirestore(app);
         auth = getAuth(app); 
         firebaseInitialized = true;
-        console.log("Firebase services initialized successfully and exposed.");
 
         // Auth Listeners
         const authModal = document.getElementById('authModal');
@@ -316,41 +324,84 @@ async function initializeFirebase() {
             }
         });
 
-        // Auth Buttons
         document.getElementById('signUpBtn').onclick = async () => {
             const email = document.getElementById('authEmail').value;
             const password = document.getElementById('authPassword').value;
-            const err = document.getElementById('authError');
-            err.textContent = '';
+            const err = document.getElementById('authError'); err.textContent = '';
             if (!email || password.length < 6) { err.textContent = 'Email and a password of at least 6 characters are required.'; return; }
-            try { await createUserWithEmailAndPassword(auth, email, password); } 
-            catch (e) { err.textContent = e.message.replace('Firebase: Error ', ''); }
+            try { await createUserWithEmailAndPassword(auth, email, password); } catch (e) { err.textContent = e.message.replace('Firebase: Error ', ''); }
         };
 
         document.getElementById('signInBtn').onclick = async () => {
             const email = document.getElementById('authEmail').value;
             const password = document.getElementById('authPassword').value;
-            const err = document.getElementById('authError');
-            err.textContent = '';
-            try { await signInWithEmailAndPassword(auth, email, password); } 
-            catch (e) { err.textContent = 'Sign-in failed. Check email or password.'; }
+            const err = document.getElementById('authError'); err.textContent = '';
+            try { await signInWithEmailAndPassword(auth, email, password); } catch (e) { err.textContent = 'Sign-in failed. Check email or password.'; }
         };
 
         document.getElementById('logoutBtn_menu').onclick = async () => {
-            try { await signOut(auth); document.getElementById('sideMenu').classList.remove('open'); document.getElementById('menuOverlay').style.display = 'none'; } 
-            catch (e) { console.error(e); }
+            try { await signOut(auth); document.getElementById('sideMenu').classList.remove('open'); document.getElementById('menuOverlay').style.display = 'none'; } catch (e) { console.error(e); }
         };
         
-        // Expose Firebase modules for use in handlers
-        return { collection, addDoc, serverTimestamp, auth, db };
+        // --- REAL TIME STOCK LOGIC ---
+        // 1. Initialize Stock if needed
+        const stockRef = collection(db, 'inventory');
+        for (const [key, qty] of Object.entries(STORE_INVENTORY)) {
+            const docRef = doc(db, 'inventory', key);
+            getDoc(docRef).then((snap) => {
+                if (!snap.exists()) {
+                    setDoc(docRef, { qty: qty }); // Create initial stock
+                }
+            });
+        }
+
+        // 2. Listen for changes and update UI
+        onSnapshot(collection(db, 'inventory'), (snapshot) => {
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const productId = doc.id;
+                const qty = data.qty;
+                currentStockState[productId] = qty; // Save for logic
+
+                // Update UI Text
+                const displayEl = document.getElementById(`stock_${productId}`);
+                const btnEl = document.getElementById(`btn_${productId}`);
+                
+                if (displayEl) {
+                    if (qty > 10) {
+                        displayEl.innerHTML = `<span class="in-stock">In Stock: ${qty} items left</span>`;
+                        displayEl.className = 'stock-display';
+                    } else if (qty > 0) {
+                        displayEl.innerHTML = `<span class="low-stock">Hurry! Only ${qty} left!</span>`;
+                        displayEl.className = 'stock-display';
+                    } else {
+                        displayEl.innerHTML = `<span class="out-of-stock">Sold Out</span>`;
+                    }
+                }
+
+                // Disable button if sold out
+                if (btnEl) {
+                    if (qty <= 0) {
+                        btnEl.disabled = true;
+                        btnEl.textContent = "Sold Out";
+                        btnEl.style.backgroundColor = "#ccc";
+                    } else {
+                        btnEl.disabled = false;
+                        btnEl.textContent = "Add to Cart";
+                        btnEl.style.backgroundColor = ""; // Reset to CSS default
+                    }
+                }
+            });
+        });
+
+        return { collection, addDoc, doc, updateDoc, increment, serverTimestamp, auth, db };
 
     } catch (error) {
-        console.error("CRITICAL: Firebase initialization or Auth setup failed. Error:", error);
+        console.error("Firebase Error:", error);
         return false; 
     }
 }
 
-// Immediately run Firebase initialization and store the promise
 const firebaseModulesPromise = initializeFirebase();
 
 // --- DOM HANDLERS ---
@@ -360,43 +411,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initializeDOMHandlers(firebaseModulesPromise) {
     
-    // Data Init
     document.querySelectorAll('.card').forEach((card, index) => {
         allProductsData.push({
             index: index,
+            id: card.dataset.id, // Capture the ID
             name: card.dataset.name,
             images: card.dataset.images.split(',').filter(s => s.trim() !== ''),
             description: card.dataset.description
         });
     });
 
-    // Menu Handlers (Modified to include WhatsApp Group)
     const sideMenu = document.getElementById('sideMenu');
     const menuOverlay = document.getElementById('menuOverlay');
-    const toggleMenu = () => {
-        sideMenu.classList.toggle('open');
-        menuOverlay.style.display = sideMenu.classList.contains('open') ? 'block' : 'none';
-    };
+    const toggleMenu = () => { sideMenu.classList.toggle('open'); menuOverlay.style.display = sideMenu.classList.contains('open') ? 'block' : 'none'; };
     document.getElementById('menuBtn').onclick = toggleMenu;
     menuOverlay.onclick = toggleMenu; 
     document.getElementById('cartBtn_menu').onclick = () => { document.getElementById('cartModal').classList.add('show'); toggleMenu(); };
     document.getElementById('orderBtn_menu').onclick = () => { document.getElementById('orderBtn_handler').click(); toggleMenu(); };
     document.getElementById('themeBtn_menu').onclick = () => { document.body.classList.toggle('dark'); };
     document.getElementById('notifyBtn_menu').onclick = () => { document.getElementById('noticeModal').classList.add('show'); toggleMenu(); };
-    document.getElementById('supportBtn_menu').onclick = () => { 
-        window.open(`https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=Hello Luxe Store Customer Service, I need assistance.`, '_blank'); toggleMenu(); 
-    };
-    // START OF ADDED CODE
-    document.getElementById('whatsappGroupBtn_menu').onclick = () => { 
-        window.open(WHATSAPP_GROUP_LINK, '_blank'); 
-        toggleMenu(); 
-    };
-    // END OF ADDED CODE
+    document.getElementById('supportBtn_menu').onclick = () => { window.open(`https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=Hello Luxe Store Customer Service`, '_blank'); toggleMenu(); };
+    document.getElementById('whatsappGroupBtn_menu').onclick = () => { window.open(WHATSAPP_GROUP_LINK, '_blank'); toggleMenu(); };
 
-    // Close Modals (Unchanged)
     document.querySelectorAll('.close, #viewerClose').forEach(c => c.onclick = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')));
 
-    // Cart System (Unchanged)
     const cartItems=document.getElementById('cartItems');
     const cartTotal=document.getElementById('cartTotal');
     function renderCart(){
@@ -406,7 +444,15 @@ function initializeDOMHandlers(firebaseModulesPromise) {
         const div=document.createElement('div');
         div.className='cart-item';
         div.innerHTML=`${i.name} x${i.qty} `;
-        const plus=document.createElement('button'); plus.textContent='+'; plus.onclick=()=>{i.qty++; renderCart();};
+        const plus=document.createElement('button'); plus.textContent='+'; 
+        plus.onclick=()=>{
+            // Check stock before adding more
+            if(i.id && currentStockState[i.id] && i.qty >= currentStockState[i.id]) {
+                alert(`Sorry, only ${currentStockState[i.id]} left in stock!`);
+                return;
+            }
+            i.qty++; renderCart();
+        };
         const minus=document.createElement('button'); minus.textContent='-'; minus.onclick=()=>{i.qty>1?i.qty--:cart.splice(idx,1); renderCart();};
         div.appendChild(plus); div.appendChild(minus);
         cartItems.appendChild(div);
@@ -414,7 +460,6 @@ function initializeDOMHandlers(firebaseModulesPromise) {
       cartTotal.textContent=total;
     }
 
-    // Product Card and Image Viewer Logic (Unchanged)
     const imageViewerModal = document.getElementById('imageViewerModal');
     const largeProductImage = document.getElementById('largeProductImage');
     const viewerPrev = document.getElementById('viewerPrev');
@@ -433,6 +478,7 @@ function initializeDOMHandlers(firebaseModulesPromise) {
 
     document.querySelectorAll('.card').forEach(card=>{
       const name=card.dataset.name;
+      const prodId=card.dataset.id; // Get ID
       const description = card.dataset.description;
       const productIndex = Number(card.querySelector('img').dataset.productIndex); 
       
@@ -447,8 +493,22 @@ function initializeDOMHandlers(firebaseModulesPromise) {
       
       if(card.querySelector('.buy') && !card.classList.contains('mtn-card')){
         card.querySelector('.buy').onclick=()=>{
+          // Initial Stock Check
+          if(prodId && currentStockState[prodId] <= 0) {
+              alert("Sorry, this item is sold out.");
+              return;
+          }
+
           let item = cart.find(i => i.name === name);
-          if (item) item.qty++; else cart.push({name,price:Number(card.dataset.price||0),qty:1});
+          if (item) {
+              if(prodId && currentStockState[prodId] && item.qty >= currentStockState[prodId]) {
+                  alert(`Sorry, only ${currentStockState[prodId]} left!`);
+                  return;
+              }
+              item.qty++; 
+          } else {
+              cart.push({name, id: prodId, price:Number(card.dataset.price||0),qty:1});
+          }
           renderCart();
           document.getElementById('cartModal').classList.add('show');
         };
@@ -467,64 +527,29 @@ function initializeDOMHandlers(firebaseModulesPromise) {
       return `${type}-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.floor(Math.random()*900+100)}`;
     }
 
-    // === CORE PAYMENT HANDLER - CRITICAL FIX APPLIED HERE ===
     async function handlePayment(email, amount, orderId, metadata, onSuccessCallback, btn) {
-        
         const originalText = btn.textContent;
         btn.textContent = "Processing...";
         btn.disabled = true;
 
         if (typeof onSuccessCallback !== 'function') {
-            console.error("Critical: onSuccessCallback is not a function!", onSuccessCallback);
-            alert("Internal Error: Payment setup failed because the success function is missing. Try again after re-loading the page.");
-            btn.textContent = originalText;
-            btn.disabled = false;
-            return;
+            alert("System Error. Reload page."); btn.textContent = originalText; btn.disabled = false; return;
         }
 
         try {
-            // 1. Force load Paystack script
             const paystackPop = await loadPaystackScript();
-
-            // 2. Setup Handler
             const handler = paystackPop.setup({
-                key: PAYSTACK_PUBLIC_KEY,
-                email: email,
-                amount: amount * 100, // Convert to kobo/pesewas
-                currency: 'GHS',
-                ref: orderId,
-                metadata: metadata,
-                // CRITICAL FIX: Ensure Paystack receives a non-async function reference directly
-                callback: (response) => { 
-                    console.log("Paystack success response received. Executing custom callback.");
-                    onSuccessCallback(response); 
-                },
-                onClose: () => {
-                    console.log('Payment window closed by user.');
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                },
-                onError: (err) => {
-                    console.error("Paystack API Error:", err);
-                    alert('Payment Initialization Failed. Please check the console for details, or check your browser for a pop-up blocked message.');
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }
+                key: PAYSTACK_PUBLIC_KEY, email: email, amount: amount * 100, currency: 'GHS', ref: orderId, metadata: metadata,
+                callback: (response) => { onSuccessCallback(response); },
+                onClose: () => { btn.textContent = originalText; btn.disabled = false; },
+                onError: (err) => { alert('Payment Initialization Failed.'); btn.textContent = originalText; btn.disabled = false; }
             });
-            
-            // 3. Open Iframe
             handler.openIframe(); 
-
         } catch (error) {
-            console.error("Payment setup error:", error);
-            alert(`Payment setup failed: ${error.message}. Please check console.`);
-            btn.textContent = originalText;
-            btn.disabled = false;
+            alert(`Payment setup failed: ${error.message}`); btn.textContent = originalText; btn.disabled = false;
         }
     }
 
-
-    // === CHECKOUT BUTTON (CART) ===
     document.getElementById('checkoutBtn').onclick = async function() {
         const btn = this;
         const modules = await firebaseModulesPromise;
@@ -532,6 +557,16 @@ function initializeDOMHandlers(firebaseModulesPromise) {
         if(!modules || !modules.auth.currentUser){ alert('Please Sign In first.'); return; } 
         if(cart.length===0){alert('Cart empty!'); return;}
         
+        // FINAL STOCK CHECK BEFORE PAYMENT
+        let stockIssue = false;
+        cart.forEach(item => {
+            if (item.id && currentStockState[item.id] < item.qty) {
+                alert(`Stock changed! We only have ${currentStockState[item.id]} of ${item.name} left.`);
+                stockIssue = true;
+            }
+        });
+        if(stockIssue) return;
+
         const name=document.getElementById('custName').value.trim();
         const phone=document.getElementById('custPhone').value.trim();
         const email=document.getElementById('custEmail').value.trim();
@@ -542,27 +577,32 @@ function initializeDOMHandlers(firebaseModulesPromise) {
         const orderId = generateOrderId("ORD");
         const userId = modules.auth.currentUser.uid;
 
-        // The success logic as a separate async function
         const successHandler = async (res) => {
             try {
+                // 1. Record Order
                 await modules.addDoc(modules.collection(modules.db,'orders'),{
                     orderId, userId, customerName:name, customerPhone:phone, customerEmail:email,
                     items:cart, totalAmount:total, status:'Paid', reference:res.reference, timestamp:modules.serverTimestamp()
                 });
+
+                // 2. DECREMENT STOCK
+                for (const item of cart) {
+                    if (item.id) {
+                        const itemRef = modules.doc(modules.db, 'inventory', item.id);
+                        await modules.updateDoc(itemRef, {
+                            qty: modules.increment(-item.qty)
+                        });
+                    }
+                }
+
                 alert('Payment successful! Order ID: '+orderId);
                 cart=[]; renderCart(); document.getElementById('cartModal').classList.remove('show');
-            } catch(e) { console.error(e); alert('Payment successful but order logging failed. Contact support with Paystack Ref: '+res.reference); }
-            finally { 
-                // Note: The button state is reset by the Paystack onClose/onError functions
-                // We keep this block for robustness but the button reset happens in Paystack's handler
-            }
+            } catch(e) { console.error(e); alert('Payment successful but order logging failed. Contact support.'); }
         };
 
-        // Call handlePayment with the non-async success handler
         await handlePayment(email, total, orderId, {}, successHandler, btn);
     };
 
-    // === MTN BUNDLES ===
     let selectedMTNPrice=5.5, selectedMTNBundle="1GB";
     document.querySelector('.mtn-bundles button').classList.add('selected');
     document.querySelectorAll('.mtn-bundles button').forEach(btn=>{
@@ -578,19 +618,16 @@ function initializeDOMHandlers(firebaseModulesPromise) {
     document.getElementById('mtnPay').onclick = async function() {
         const btn = this;
         const modules = await firebaseModulesPromise;
-
         if(!modules || !modules.auth.currentUser){ alert('Please Sign In first.'); return; } 
         const number=document.getElementById('mtnNumber').value.trim();
         const name=document.getElementById('mtnName').value.trim();
         const email=document.getElementById('mtnEmail').value.trim();
-        
         if(!number||!name||!email){alert('Please fill all details.'); return;}
         if(number.length !== 10){alert('Invalid 10-digit MTN number (e.g., 054xxxxxxx).'); return;}
 
         const orderId = generateOrderId("MTN");
         const userId = modules.auth.currentUser.uid;
 
-        // The success logic as a separate async function
         const successHandler = async (res) => {
             try {
                 await modules.addDoc(modules.collection(modules.db,'mtn_orders'),{
@@ -599,10 +636,7 @@ function initializeDOMHandlers(firebaseModulesPromise) {
                 });
                 alert('MTN Bundle Purchased! Order ID: '+orderId);
                 document.getElementById('mtnModal').classList.remove('show');
-            } catch(e) { console.error(e); alert('Payment successful but order logging failed. Contact support with Paystack Ref: '+res.reference); }
-            finally { 
-                // Note: The button state is reset by the Paystack onClose/onError functions
-            }
+            } catch(e) { console.error(e); alert('Payment successful but error logging. Ref: '+res.reference); }
         };
 
         await handlePayment(email, selectedMTNPrice, orderId, {
@@ -610,7 +644,6 @@ function initializeDOMHandlers(firebaseModulesPromise) {
         }, successHandler, btn);
     };
     
-    // WhatsApp Order Handler (Unchanged)
     const orderBtnHandler = document.createElement('button');
     orderBtnHandler.id = 'orderBtn_handler'; orderBtnHandler.style.display = 'none';
     document.body.appendChild(orderBtnHandler);
@@ -619,23 +652,15 @@ function initializeDOMHandlers(firebaseModulesPromise) {
         if(!modules || !modules.auth.currentUser){ alert('Please Sign In first.'); return; }
         if(cart.length===0){alert('Cart empty!'); return;}
         
-        let total = 0;
-        let itemsList = '';
+        let total = 0; let itemsList = '';
         cart.forEach((i, index)=>{
           const subtotal = i.price * i.qty;
           itemsList += `\n*${index + 1}.* ${i.name} (x${i.qty} @ ₵${i.price} = ₵${subtotal})`;
           total += subtotal;
         });
 
-        let message=`Hello Luxe Store! I am confirming my order details for manual processing.\n\n*Account Email:* ${modules.auth.currentUser.email}\n\n*--- ORDER SUMMARY ---*${itemsList}\n\n*GRAND TOTAL: ₵${total}*\n\n*--- CUSTOMER & DELIVERY DETAILS ---*
-Please use the following information for my delivery:
-\n\u2022 *Full Name:* [ENTER YOUR FULL NAME]
-\n\u2022 *Phone Number:* [ENTER YOUR ACTIVE PHONE NUMBER]
-\n\u2022 *Delivery Location:* [ENTER YOUR TOWN, STREET NAME, AND NEAREST LANDMARK]
-\n\nPlease reply to confirm the order and delivery charge. Thank you!`;
-        
-        const whatsappUrl = `https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=${encodeURIComponent(message)}`; 
-        window.open(whatsappUrl, '_blank');
+        let message=`Hello Luxe Store! Confirming order details.\n\n*Account:* ${modules.auth.currentUser.email}\n*--- ORDER ---*${itemsList}\n\n*TOTAL: ₵${total}*\n\nPlease provide delivery info.`;
+        window.open(`https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
     };
 }
 </script>
