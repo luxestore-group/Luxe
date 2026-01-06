@@ -100,6 +100,12 @@
     }
     #menuBtn:hover { transform: scale(1.1); color: var(--primary); }
 
+    /* notification bell */
+    .notif-wrap { position: relative; margin-right: 12px; display:flex; align-items:center; gap:8px; }
+    #notifBell { background: transparent; border: none; cursor:pointer; font-size:20px; padding:8px; border-radius:8px; transition: var(--transition); }
+    #notifBell:hover { background: rgba(0,0,0,0.04); color: var(--primary); }
+    .notif-badge { position: absolute; top: 6px; right: 0; background: var(--accent-red); color:white; font-size:11px; padding:4px 7px; border-radius:999px; font-weight:700; display:none; min-width:20px; text-align:center; }
+
     /* --- PRODUCT GRID --- */
     .products {
         display: grid;
@@ -442,11 +448,27 @@
         animation: glow-pulse 1.5s infinite;
     }
 
-    /* Image Viewer */
-    #imageViewerModal .modal-box { background: transparent; box-shadow: none; width: 100%; height: 100%; max-width: none; padding: 0; }
-    #largeProductImage { max-height: 80vh; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-    .viewer-nav { background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.3); }
-    .viewer-nav:hover { background: rgba(255,255,255,0.4); }
+    /* Image Viewer: improved visibility and controls */
+    #imageViewerModal .modal-box { background: transparent; box-shadow: none; width: 100%; height: 100%; max-width: none; padding: 0; display:flex; align-items:center; justify-content:center; position:relative; }
+    #largeProductImage { max-height: 80vh; max-width: 90%; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); display:block; margin:auto; }
+    .viewer-nav { position:absolute; top:50%; transform:translateY(-50%); width:48px; height:48px; border-radius:50%; font-size:24px; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.6); color: white; border:none; z-index: 1100; cursor:pointer; }
+    .viewer-nav:hover { background: rgba(0,0,0,0.8); transform: translateY(-50%) scale(1.04); }
+    #viewerPrev { left: 20px; }
+    #viewerNext { right: 20px; }
+
+    /* viewer close - highly visible */
+    #viewerClose { position:absolute; top:16px; right:16px; width:44px; height:44px; border-radius:50%; background: rgba(0,0,0,0.7); color: white; display:flex; align-items:center; justify-content:center; font-size:20px; z-index:1200; cursor:pointer; }
+    #viewerClose:hover { background: rgba(0,0,0,0.9); transform: scale(1.04); }
+
+    /* notification modal content */
+    #userNotifModal .modal-box { max-width: 520px; }
+    .notif-list { max-height: 50vh; overflow:auto; padding: 8px; }
+    .notif-item { padding: 10px; border-bottom:1px solid #eee; font-size:0.95rem; }
+    .notif-item.unread { background: rgba(212,175,55,0.05); }
+
+    /* toast */
+    .toast { position: fixed; right: 18px; bottom: 18px; background: #111; color:#fff; padding: 12px 16px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.3); z-index: 4000; opacity:0; transform: translateY(10px); transition: all 0.25s ease; max-width:320px; }
+    .toast.show { opacity:1; transform: translateY(0); }
 
     /* Scrollbar */
     ::-webkit-scrollbar { width: 8px; }
@@ -460,6 +482,8 @@
         .card img { height: 200px; }
         .header-logo { height: 35px; width: 35px; }
         .header-content h1 { font-size: 1.3rem; }
+        .viewer-nav { width:40px; height:40px; font-size:20px; }
+        #viewerClose { width:40px; height:40px; font-size:18px; }
     }
 </style>
 </head>
@@ -486,20 +510,33 @@
     <button id="notifyBtn_menu">🔔 Notice</button>
     <button id="supportBtn_menu">📞 Customer Service</button> 
     <button id="whatsappGroupBtn_menu" style="background: #25d366; color: white;">👥 WhatsApp Group</button>
+    <button id="adminBtn_menu" style="display: none; background: var(--primary); color: white;">🛠️ Admin Dashboard</button>
     <button id="logoutBtn_menu" style="display: none;">Log Out</button>
 </div>
 <div id="menuOverlay"></div>
 
 <header>
     <button id="menuBtn">☰</button> 
-    <div class="header-content"> 
-        <img src="images/luxe_logo.png" alt="Luxe Store Logo" <div class="header-logo">
-    <h1>Luxe Store</h1>
-<p class="welcome-message" style="color: red; font-weight: bold;">
-    FLASH SALES!!!!(MUST READ INSTRUCTIONS FROM NOTICE "IN THE MENU!!")
-</p>
+    <div class="header-content">
+        <div style="display:flex; align-items:center; justify-content:center; gap:12px;">
+            <img src="images/luxe_logo.png" alt="Luxe Store Logo" class="header-logo">
+            <div>
+                <h1>Luxe Store</h1>
+                <p class="welcome-message" style="color: red; font-weight: bold;">
+                    FLASH SALES!!!!(MUST READ INSTRUCTIONS FROM NOTICE "IN THE MENU!!")
+                </p>
+            </div>
+        </div>
     </div>
-    <div style="width: 24px; margin-right: 15px;"></div> 
+
+    <!-- notif bell + spacer -->
+    <div style="display:flex; align-items:center;">
+      <div class="notif-wrap">
+        <button id="notifBell" title="Notifications">🔔MSG</button>
+        <div class="notif-badge" id="notifBadge">0</div>
+      </div>
+      <div style="width: 12px;"></div>
+    </div>
 </header>
 
 <div class="scroll-indicator" id="scrollDownBtn">
@@ -577,6 +614,9 @@
 <input id="custPhone" placeholder="Phone number">
 <input id="custEmail" placeholder="Email">
 <button class="pay" id="checkoutBtn">Checkout & Pay</button>
+<!-- NEW: Place order WITHOUT payment (for admin to process manually) -->
+<!-- CHANGE: made this 'pay' class to appear lively like checkout -->
+<button class="pay" id="placeOrderBtn" style="margin-top:10px;">Place Order (No Payment)</button>
 </div>
 </div>
 
@@ -592,12 +632,10 @@
 <div class="modal" id="imageViewerModal">
     <div class="modal-box">
         <span id="viewerClose">×</span>
-        <div id="imageViewerContent">
-            <button id="viewerPrev" class="viewer-nav">&#10094;</button>
-            <img id="largeProductImage" src="">
-            <button id="viewerNext" class="viewer-nav">&#10095;</button>
-        </div>
-        <div style="color: white; margin-top: 10px;">Tap or click image to zoom/unzoom.</div>
+        <button id="viewerPrev" class="viewer-nav">&#10094;</button>
+        <img id="largeProductImage" src="">
+        <button id="viewerNext" class="viewer-nav">&#10095;</button>
+        <div style="color: white; margin-top: 10px; position:absolute; bottom:12px; left:50%; transform:translateX(-50%);">Tap or click image to zoom/unzoom.</div>
     </div>
 </div>
 
@@ -641,6 +679,39 @@
 </div>
 </div>
 
+<!-- Admin Modal -->
+<div class="modal" id="adminModal">
+  <div class="modal-box" style="max-width: 900px;">
+    <span class="close">×</span>
+    <h3>Admin Dashboard — Orders</h3>
+    <div id="adminSearchContainer" style="margin-bottom:12px; display:flex; gap:8px; align-items:center;">
+  <input id="adminSearchInput" type="text" placeholder="Enter Order ID" style="flex:1; padding:6px; border-radius:6px; border:1px solid #ccc;">
+  <button id="adminSearchBtn" style="padding:6px 10px; border-radius:6px; border:none; background:#007bff; color:white; cursor:pointer;">Search</button>
+  <button id="adminResetBtn" style="padding:6px 10px; border-radius:6px; border:none; background:#6c757d; color:white; cursor:pointer;">Reset</button>
+</div>
+    <div id="adminOrdersContainer" style="font-size: 0.95rem;">
+      <p>Loading orders...</p>
+    </div>
+  </div>
+</div>
+
+<!-- User Notifications Modal -->
+<div class="modal" id="userNotifModal">
+  <div class="modal-box">
+    <span class="close">×</span>
+    <h3>Your Notifications</h3>
+    <div class="notif-list" id="notifList">
+      <p>No notifications yet.</p>
+    </div>
+    <div style="margin-top:12px; display:flex; gap:8px;">
+      <button id="markAllReadBtn" style="padding:10px; border-radius:8px; border:none; background:var(--primary); color:white;">Mark all read</button>
+      <button id="clearNotifBtn" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);">Clear</button>
+    </div>
+  </div>
+</div>
+
+<!-- toast container will be created dynamically -->
+
 <script type="module">
 // --- GLOBAL CONFIGURATION ---
 const PAYSTACK_PUBLIC_KEY = 'pk_live_98575428080557d261e91cb92fe745f878fc4278';
@@ -648,8 +719,10 @@ const CUSTOMER_SERVICE_NUMBER = '233548164533';
 const DEFAULT_USER_EMAIL = 'jbellingham771@gmail.com'; 
 const WHATSAPP_GROUP_LINK = 'https://chat.whatsapp.com/GxS4tPlo8sqH8xkbARNvPc';
 
+// ---- IMPORTANT: set your admin uid here (replace with real uid) ----
+const ADMIN_UID = 'xDct2LPsWwfcjkRl9TwhU0CCwho1'; // <<--- change this to your firebase auth UID
+
 // --- INVENTORY MANAGEMENT (CHANGE NUMBERS HERE TO UPDATE STOCK) ---
-// If you want to change stock, change the number here and refresh the page.
 const STORE_INVENTORY = {
     'blender': 20,
     'earphones': 50,
@@ -663,6 +736,75 @@ let allProductsData = [];
 let currentStockState = {}; // Keeps track of live stock
 let PaystackPop; 
 
+// -------------------- Notification helpers --------------------
+let userNotifications = []; // in-memory list for UI
+let unreadCount = 0;
+
+function updateNotifBadge() {
+  const badge = document.getElementById('notifBadge');
+  if(!badge) return;
+  if(unreadCount > 0) {
+    badge.style.display = 'block';
+    badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function addUserNotification(n) {
+  // n = { id, text, time (Date or string), read: bool }
+  userNotifications.unshift(n);
+  if(!n.read) unreadCount++;
+  updateNotifBadge();
+  renderNotifList();
+  showToast(n.text);
+}
+
+function renderNotifList() {
+  const list = document.getElementById('notifList');
+  if(!list) return;
+  if(userNotifications.length === 0) {
+    list.innerHTML = '<p>No notifications yet.</p>'; return;
+  }
+  list.innerHTML = userNotifications.map(n => {
+    const t = (n.time && n.time.toLocaleString) ? n.time.toLocaleString() : (n.time || '');
+    return `<div class="notif-item ${n.read ? '' : 'unread'}" data-id="${n.id}">
+      <div style="font-weight:600;">${n.text}</div>
+      <div style="font-size:0.85rem;color:#666;margin-top:6px">${t}</div>
+    </div>`;
+  }).join('');
+}
+
+function markAllNotificationsRead() {
+  userNotifications = userNotifications.map(n => ({...n, read:true}));
+  unreadCount = 0;
+  updateNotifBadge();
+  renderNotifList();
+}
+
+function clearNotifications() {
+  userNotifications = [];
+  unreadCount = 0;
+  updateNotifBadge();
+  renderNotifList();
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  // trigger show
+  setTimeout(()=> t.classList.add('show'), 10);
+  // remove after 5s
+  setTimeout(()=> {
+    t.classList.remove('show');
+    setTimeout(()=> t.remove(), 350);
+  }, 5000);
+}
+
+// -------------------- End notification helpers --------------------
+
 function loadPaystackScript() {
     return new Promise((resolve, reject) => {
         if (window.PaystackPop) { PaystackPop = window.PaystackPop; resolve(PaystackPop); return; }
@@ -674,14 +816,14 @@ function loadPaystackScript() {
     });
 }
 
-// --- FIREBASE SETUP ---
+// ---------------- firebase initialization ----------------
 let app, db, auth;
 let firebaseInitialized = false;
 
 async function initializeFirebase() {
     try {
         const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
-        const { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, increment, onSnapshot, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        const { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, increment, onSnapshot, serverTimestamp, query, orderBy, getDocs, where } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
         const { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"); 
 
        const firebaseConfig = {
@@ -699,22 +841,40 @@ async function initializeFirebase() {
         auth = getAuth(app); 
         firebaseInitialized = true;
 
+        // create a modules object to pass around
+        const modules = { collection, addDoc, doc, setDoc, getDoc, updateDoc, increment, onSnapshot, serverTimestamp, auth, db, getDocs, query, orderBy, where };
+
         // Auth Listeners
         const authModal = document.getElementById('authModal');
         const logoutBtnMenu = document.getElementById('logoutBtn_menu'); 
-        
+        const adminBtnMenu = document.getElementById('adminBtn_menu');
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 authModal.classList.remove('show');
                 logoutBtnMenu.style.display = 'block'; 
                 if(document.getElementById('custEmail')) document.getElementById('custEmail').value = user.email;
                 if(document.getElementById('mtnEmail')) document.getElementById('mtnEmail').value = user.email;
+
+                // Show admin button if this user is admin
+                if(user.uid === ADMIN_UID) {
+                    adminBtnMenu.style.display = 'block';
+                } else {
+                    adminBtnMenu.style.display = 'none';
+                }
+
+                // setup per-user listeners for notifications
+                try { setupUserNotifications(modules, user.uid); } catch(e) { console.error('setupUserNotifications failed', e); }
+
             } else {
                 authModal.classList.add('show');
                 logoutBtnMenu.style.display = 'none'; 
+                adminBtnMenu.style.display = 'none';
                 if(document.getElementById('custEmail')) document.getElementById('custEmail').value = DEFAULT_USER_EMAIL;
                 if(document.getElementById('mtnEmail')) document.getElementById('mtnEmail').value = DEFAULT_USER_EMAIL;
-            }
+                // clear client-side notification state when logged out
+                clearNotifications();
+              }
         });
 
         document.getElementById('signUpBtn').onclick = async () => {
@@ -738,21 +898,20 @@ async function initializeFirebase() {
         
         // --- REAL TIME STOCK LOGIC ---
         // 1. Initialize Stock if needed
-        const stockRef = collection(db, 'inventory');
         for (const [key, qty] of Object.entries(STORE_INVENTORY)) {
             const docRef = doc(db, 'inventory', key);
             getDoc(docRef).then((snap) => {
                 if (!snap.exists()) {
-                    setDoc(docRef, { qty: qty }); // Create initial stock
+                    setDoc(docRef, { qty: qty }).catch(err => console.error('Failed to set initial stock for', key, err)); // Create initial stock
                 }
-            });
+            }).catch(err => console.error('getDoc inventory error', err));
         }
 
         // 2. Listen for changes and update UI
         onSnapshot(collection(db, 'inventory'), (snapshot) => {
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                const productId = doc.id;
+            snapshot.forEach((d) => {
+                const data = d.data();
+                const productId = d.id;
                 const qty = data.qty;
                 currentStockState[productId] = qty; // Save for logic
 
@@ -785,9 +944,10 @@ async function initializeFirebase() {
                     }
                 }
             });
-        });
+        }, (err) => console.error('inventory onSnapshot error', err));
 
-        return { collection, addDoc, doc, updateDoc, increment, serverTimestamp, auth, db };
+        // Return the modules for external use
+        return modules;
 
     } catch (error) {
         console.error("Firebase Error:", error);
@@ -797,7 +957,96 @@ async function initializeFirebase() {
 
 const firebaseModulesPromise = initializeFirebase();
 
-// --- DOM HANDLERS ---
+// ---------------- set up user notification listeners ----------------
+/*
+  - modules: returned firestore utilities
+  - uid: authenticated user's uid
+*/
+function setupUserNotifications(modules, uid) {
+  if(!modules || !modules.onSnapshot || !modules.query || !modules.where) return;
+  // keep track of previous statuses so we only notify on change
+  const orderStatusMap = {};
+
+  // helper to push notification
+  function notifyForOrder(docData, docId, colName, changeType) {
+    const orderLabel = docData.orderId || docId || 'Order';
+    const status = docData.status || (docData.paid ? 'Paid' : 'pending');
+    let text = '';
+
+    if(changeType === 'added') {
+      text = `${orderLabel} received — status: ${status}`;
+    } else if(changeType === 'modified') {
+      text = `${orderLabel} status updated: ${status}`;
+    } else {
+      text = `${orderLabel}: ${status}`;
+    }
+
+    addUserNotification({
+      id: `${colName}_${docId}_${Date.now()}`,
+      text,
+      time: new Date(),
+      read: false
+    });
+  }
+
+  // listen for product orders for this user
+  try {
+    const qOrders = modules.query(modules.collection(modules.db, 'orders'), modules.where('userId', '==', uid));
+    modules.onSnapshot(qOrders, (snapshot) => {
+      snapshot.docChanges().forEach(change => {
+        const d = change.doc.data();
+        const id = change.doc.id;
+        if(change.type === 'added') {
+          orderStatusMap[id] = d.status || '';
+          // notify user that order is placed (pending/paid)
+          notifyForOrder(d, id, 'orders', 'added');
+        } else if(change.type === 'modified') {
+          const prev = orderStatusMap[id] || '';
+          const now = d.status || '';
+          if(prev !== now) {
+            orderStatusMap[id] = now;
+            notifyForOrder(d, id, 'orders', 'modified');
+          } else {
+            // also check paid flag change
+            if((d.paid === true) && prev !== 'paid') {
+              orderStatusMap[id] = 'paid';
+              notifyForOrder(d, id, 'orders', 'modified');
+            }
+          }
+        }
+      });
+    }, (err) => { console.error('user orders notif listener error', err); });
+  } catch(e) { console.error('setup orders notif failed', e); }
+
+  // listen for mtn orders for this user
+  try {
+    const qMtn = modules.query(modules.collection(modules.db, 'mtn_orders'), modules.where('userId', '==', uid));
+    modules.onSnapshot(qMtn, (snapshot) => {
+      snapshot.docChanges().forEach(change => {
+        const d = change.doc.data();
+        const id = change.doc.id;
+        if(change.type === 'added') {
+          orderStatusMap['mtn_'+id] = d.status || '';
+          notifyForOrder(d, id, 'mtn_orders', 'added');
+        } else if(change.type === 'modified') {
+          const prev = orderStatusMap['mtn_'+id] || '';
+          const now = d.status || '';
+          if(prev !== now) {
+            orderStatusMap['mtn_'+id] = now;
+            notifyForOrder(d, id, 'mtn_orders', 'modified');
+          } else {
+            if((d.paid === true) && prev !== 'paid') {
+              orderStatusMap['mtn_'+id] = 'paid';
+              notifyForOrder(d, id, 'mtn_orders', 'modified');
+            }
+          }
+        }
+      });
+    }, (err) => { console.error('user mtn_orders notif listener error', err); });
+  } catch(e) { console.error('setup mtn notif failed', e); }
+}
+
+// -------------------- DOM handlers --------------------
 document.addEventListener('DOMContentLoaded', () => {
     initializeDOMHandlers(firebaseModulesPromise);
 });
@@ -807,10 +1056,10 @@ function initializeDOMHandlers(firebaseModulesPromise) {
     document.querySelectorAll('.card').forEach((card, index) => {
         allProductsData.push({
             index: index,
-            id: card.dataset.id, // Capture the ID
+            id: card.dataset.id || null, // Capture the ID (may be null for mtn-card)
             name: card.dataset.name,
-            images: card.dataset.images.split(',').filter(s => s.trim() !== ''),
-            description: card.dataset.description
+            images: (card.dataset.images || '').split(',').filter(s => s.trim() !== ''),
+            description: card.dataset.description || ''
         });
     });
 
@@ -842,6 +1091,92 @@ function initializeDOMHandlers(firebaseModulesPromise) {
     document.getElementById('supportBtn_menu').onclick = () => { window.open(`https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=Hello Luxe Store Customer Service`, '_blank'); toggleMenu(); };
     document.getElementById('whatsappGroupBtn_menu').onclick = () => { window.open(WHATSAPP_GROUP_LINK, '_blank'); toggleMenu(); };
 
+    // Admin dashboard opener
+document.getElementById('adminBtn_menu').onclick = () => {
+  document.getElementById('adminModal').classList.add('show');
+  toggleMenu();
+  loadAdminOrders(); // populate admin data
+};
+
+(function setupAdminSearch() {
+  const searchInput = document.getElementById('adminSearchInput');
+  const searchBtn = document.getElementById('adminSearchBtn');
+  const resetBtn = document.getElementById('adminResetBtn');
+  const ordersContainer = document.getElementById('adminOrdersContainer');
+
+  async function searchOrderByID() {
+    const orderID = searchInput.value.trim();
+    if (!orderID) {
+      alert('Enter an Order ID to search.');
+      return;
+    }
+
+    try {
+      const modules = await firebaseModulesPromise;
+      const { db, collection, query, where, getDocs } = modules;
+
+      // Clear current display
+      ordersContainer.innerHTML = '';
+
+      // Search 'orders' collection
+      const ordersQuery = query(collection(db, 'orders'), where('orderId', '==', orderID));
+      const ordersSnap = await getDocs(ordersQuery);
+
+      if (!ordersSnap.empty) {
+        ordersSnap.forEach(docSnap => displayOrder(docSnap, 'orders'));
+        return;
+      }
+
+      // Search 'mtn_orders' collection
+      const mtnQuery = query(collection(db, 'mtn_orders'), where('orderId', '==', orderID));
+      const mtnSnap = await getDocs(mtnQuery);
+
+      if (!mtnSnap.empty) {
+        mtnSnap.forEach(docSnap => displayOrder(docSnap, 'mtn_orders'));
+        return;
+      }
+
+      alert('Order ID not found.');
+    } catch (err) {
+      console.error(err);
+      alert('Error fetching order.');
+    }
+  }
+
+  function displayOrder(snap, collectionName) {
+    const data = snap.data();
+    const div = document.createElement('div');
+    div.style = "border:1px solid #ddd; padding:10px; margin-bottom:6px; border-radius:6px; background:#f9f9f9;";
+    div.innerHTML = `
+      <strong>Order ID:</strong> ${data.orderId || snap.id} <br>
+      <strong>Collection:</strong> ${collectionName} <br>
+      <strong>User:</strong> ${data.userName || 'N/A'} <br>
+      <strong>Status:</strong> ${data.status || 'N/A'} <br>
+      <strong>Timestamp:</strong> ${data.timestamp?.toDate ? data.timestamp.toDate() : data.timestamp || 'N/A'} <br>
+      <strong>Details:</strong> ${JSON.stringify(data.items || data.bundle || data.products || {})}
+    `;
+    ordersContainer.appendChild(div);
+  }
+
+  searchBtn.onclick = searchOrderByID;
+  searchInput.addEventListener('keypress', e => { if(e.key === 'Enter') searchOrderByID(); });
+  resetBtn.onclick = () => {
+    searchInput.value = '';
+    if (typeof loadAdminOrders === 'function') loadAdminOrders();
+  };
+})();
+
+// User notification modal opener
+document.getElementById('notifBell').onclick = () => {
+  document.getElementById('userNotifModal').classList.add('show');
+  // mark read on open (optional)
+  // markAllNotificationsRead();
+};
+
+    document.getElementById('markAllReadBtn').onclick = () => { markAllNotificationsRead(); };
+    document.getElementById('clearNotifBtn').onclick = () => { clearNotifications(); };
+
+    // close handlers (includes viewerClose)
     document.querySelectorAll('.close, #viewerClose').forEach(c => c.onclick = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')));
 
     const cartItems=document.getElementById('cartItems');
@@ -876,29 +1211,41 @@ function initializeDOMHandlers(firebaseModulesPromise) {
     let currentViewerImages = [], currentViewerIndex = 0;
 
     function updateImageViewer() {
-        largeProductImage.src = currentViewerImages[currentViewerIndex];
+        largeProductImage.src = currentViewerImages[currentViewerIndex] || '';
         largeProductImage.classList.remove('zoomed'); 
-        viewerPrev.style.display = currentViewerImages.length > 1 ? 'block' : 'none';
-        viewerNext.style.display = currentViewerImages.length > 1 ? 'block' : 'none';
+        viewerPrev.style.display = currentViewerImages.length > 1 ? 'flex' : 'none';
+        viewerNext.style.display = currentViewerImages.length > 1 ? 'flex' : 'none';
     }
     viewerPrev.onclick = () => { if(currentViewerIndex > 0) currentViewerIndex--; updateImageViewer(); };
     viewerNext.onclick = () => { if(currentViewerIndex < currentViewerImages.length - 1) currentViewerIndex++; updateImageViewer(); };
     largeProductImage.onclick = () => { largeProductImage.classList.toggle('zoomed'); };
 
+    // allow keyboard navigation inside viewer for convenience
+    document.addEventListener('keydown', (e) => {
+      if(document.getElementById('imageViewerModal').classList.contains('show')) {
+        if(e.key === 'ArrowLeft') viewerPrev.click();
+        if(e.key === 'ArrowRight') viewerNext.click();
+        if(e.key === 'Escape') document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
+      }
+    });
+
     document.querySelectorAll('.card').forEach(card=>{
       const name=card.dataset.name;
       const prodId=card.dataset.id; // Get ID
       const description = card.dataset.description;
-      const productIndex = Number(card.querySelector('img').dataset.productIndex); 
+      const productIndex = Number(card.querySelector('img').dataset.productIndex || 0); 
       
-      card.querySelector('img').onclick = () => {
-          if(allProductsData[productIndex]) {
-             currentViewerImages = allProductsData[productIndex].images;
-             currentViewerIndex = 0;
-             updateImageViewer();
-             imageViewerModal.classList.add('show');
-          }
-      };
+      const imgEl = card.querySelector('img');
+      if(imgEl) {
+        imgEl.onclick = () => {
+            if(allProductsData[productIndex]) {
+               currentViewerImages = allProductsData[productIndex].images;
+               currentViewerIndex = 0;
+               updateImageViewer();
+               imageViewerModal.classList.add('show');
+            }
+        };
+      }
       
       if(card.querySelector('.buy') && !card.classList.contains('mtn-card')){
         card.querySelector('.buy').onclick=()=>{
@@ -963,7 +1310,7 @@ function initializeDOMHandlers(firebaseModulesPromise) {
         const btn = this;
         const modules = await firebaseModulesPromise;
 
-        if(!modules || !modules.auth.currentUser){ alert('Please Sign In first.'); return; } 
+        if(!modules || !modules.auth || !modules.auth.currentUser){ alert('Please Sign In first.'); return; } 
         if(cart.length===0){alert('Cart empty!'); return;}
         
         // FINAL STOCK CHECK BEFORE PAYMENT
@@ -988,19 +1335,41 @@ function initializeDOMHandlers(firebaseModulesPromise) {
 
         const successHandler = async (res) => {
             try {
-                // 1. Record Order
-                await modules.addDoc(modules.collection(modules.db,'mtn_orders'),{
-                    orderId, userId, customerName:name, customerPhone:phone, customerEmail:email,
-                    items:cart, totalAmount:total, status:'Paid', reference:res.reference, timestamp:modules.serverTimestamp()
-                });
+                // 1. Record Order into 'orders' collection (separate from mtn orders)
+                const orderObject = {
+                    orderId,
+                    userId,
+                    customerName: name,
+                    customerPhone: phone,
+                    customerEmail: email,
+                    items: cart.map(i => ({ id: i.id || null, name: i.name, price: i.price, qty: i.qty })),
+                    totalAmount: total,
+                    status: 'Paid',
+                    paid: true,
+                    transactionId: res.reference || null,
+                    reference: res.reference,
+                    timestamp: modules.serverTimestamp()
+                };
+
+                // ensure modules.addDoc exists
+                if(!modules || !modules.addDoc || !modules.collection) {
+                    console.error('Firebase modules missing when trying to add order.', modules);
+                    alert('Order saved failed: Firebase not initialized correctly. Contact support.');
+                } else {
+                    await modules.addDoc(modules.collection(modules.db,'orders'), orderObject);
+                }
 
                 // 2. DECREMENT STOCK
                 for (const item of cart) {
                     if (item.id) {
-                        const itemRef = modules.doc(modules.db, 'inventory', item.id);
-                        await modules.updateDoc(itemRef, {
-                            qty: modules.increment(-item.qty)
-                        });
+                        try {
+                            const itemRef = modules.doc(modules.db, 'inventory', item.id);
+                            await modules.updateDoc(itemRef, {
+                                qty: modules.increment(-item.qty)
+                            });
+                        } catch (err) {
+                            console.error(`Failed to decrement stock for ${item.id}`, err);
+                        }
                     }
                 }
 
@@ -1010,6 +1379,63 @@ function initializeDOMHandlers(firebaseModulesPromise) {
         };
 
         await handlePayment(email, total, orderId, {}, successHandler, btn);
+    };
+
+    // --- NEW: Place order without taking payment (manual/admin flow)
+    document.getElementById('placeOrderBtn').onclick = async function() {
+        const btn = this;
+        btn.disabled = true;
+        const modules = await firebaseModulesPromise;
+        try {
+            if(!modules || !modules.auth || !modules.auth.currentUser){ alert('Please Sign In first.'); btn.disabled = false; return; } 
+            if(cart.length===0){alert('Cart empty!'); btn.disabled = false; return;}
+
+            const name=document.getElementById('custName').value.trim();
+            const phone=document.getElementById('custPhone').value.trim();
+            const email=document.getElementById('custEmail').value.trim();
+            const total=Number(cartTotal.textContent);
+
+            if(!name||!phone||!email){alert('Please fill all details.'); btn.disabled = false; return;}
+
+            const orderId = generateOrderId("ORD");
+            const userId = modules.auth.currentUser.uid;
+
+            const orderObject = {
+                orderId,
+                userId,
+                customerName: name,
+                customerPhone: phone,
+                customerEmail: email,
+                items: cart.map(i => ({ id: i.id || null, name: i.name, price: i.price, qty: i.qty })),
+                totalAmount: total,
+                status: 'pending',            // important: admin will see this and process
+                paid: false,
+                transactionId: null,
+                reference: null,
+                method: 'manual',            // indicates not paid via Paystack
+                timestamp: modules.serverTimestamp()
+            };
+
+            // write order
+            if(!modules || !modules.addDoc || !modules.collection) {
+                console.error('Firebase modules missing when trying to add manual order.', modules);
+                alert('Order save failed: Firebase not initialized correctly. Contact support.');
+                btn.disabled = false;
+                return;
+            }
+
+            await modules.addDoc(modules.collection(modules.db,'orders'), orderObject);
+
+            // Do NOT decrement stock here automatically for manual orders.
+            // If you want stock decremented when you confirm, do it after admin confirms.
+            alert('Order placed (pending). Admin will contact you. Order ID: '+orderId);
+            cart=[]; renderCart(); document.getElementById('cartModal').classList.remove('show');
+        } catch (err) {
+            console.error('Manual order save error', err);
+            alert('Failed to place order. Check console for details.');
+        } finally {
+            btn.disabled = false;
+        }
     };
 
     let selectedMTNPrice=6, selectedMTNBundle="1GB";
@@ -1027,7 +1453,7 @@ function initializeDOMHandlers(firebaseModulesPromise) {
     document.getElementById('mtnPay').onclick = async function() {
         const btn = this;
         const modules = await firebaseModulesPromise;
-        if(!modules || !modules.auth.currentUser){ alert('Please Sign In first.'); return; } 
+        if(!modules || !modules.auth || !modules.auth.currentUser){ alert('Please Sign In first.'); return; } 
         const number=document.getElementById('mtnNumber').value.trim();
         const name=document.getElementById('mtnName').value.trim();
         const email=document.getElementById('mtnEmail').value.trim();
@@ -1039,10 +1465,28 @@ function initializeDOMHandlers(firebaseModulesPromise) {
 
         const successHandler = async (res) => {
             try {
-                await modules.addDoc(modules.collection(modules.db,'mtn_orders'),{
-                    orderId, userId, customerName:name, customerPhone:number, customerEmail:email,
-                    bundle:selectedMTNBundle, amount:selectedMTNPrice, status:'Paid', reference:res.reference, timestamp:modules.serverTimestamp()
-                });
+                const orderObject = {
+                    orderId,
+                    userId,
+                    customerName: name,
+                    customerPhone: number,
+                    customerEmail: email,
+                    bundle: selectedMTNBundle,
+                    amount: selectedMTNPrice,
+                    status: 'Paid',
+                    paid: true,
+                    transactionId: res.reference || null,
+                    reference: res.reference,
+                    timestamp: modules.serverTimestamp()
+                };
+
+                if(!modules || !modules.addDoc) {
+                    console.error('Firebase modules missing when trying to add mtn order.', modules);
+                    alert('Bundle purchase logged failed: Firebase not initialized correctly. Contact support.');
+                } else {
+                    await modules.addDoc(modules.collection(modules.db,'mtn_orders'), orderObject);
+                }
+
                 alert('MTN Bundle Purchased! Order ID: '+orderId);
                 document.getElementById('mtnModal').classList.remove('show');
             } catch(e) { console.error(e); alert('Payment successful but error logging. Ref: '+res.reference); }
@@ -1058,7 +1502,7 @@ function initializeDOMHandlers(firebaseModulesPromise) {
     document.body.appendChild(orderBtnHandler);
     orderBtnHandler.onclick = async () => {
         const modules = await firebaseModulesPromise;
-        if(!modules || !modules.auth.currentUser){ alert('Please Sign In first.'); return; }
+        if(!modules || !modules.auth || !modules.auth.currentUser){ alert('Please Sign In first.'); return; }
         if(cart.length===0){alert('Cart empty!'); return;}
         
         let total = 0; let itemsList = '';
@@ -1071,6 +1515,140 @@ function initializeDOMHandlers(firebaseModulesPromise) {
         let message=`Hello Luxe Store! Confirming order details.\n\n*Account:* ${modules.auth.currentUser.email}\n*--- ORDER ---*${itemsList}\n\n*TOTAL: ₵${total}*\n\nPlease provide delivery info.`;
         window.open(`https://wa.me/${CUSTOMER_SERVICE_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
     };
+
+    // ---- ADMIN: load orders into admin panel (listens to both collections) ----
+    async function loadAdminOrders() {
+      const modules = await firebaseModulesPromise;
+      const container = document.getElementById('adminOrdersContainer');
+      if(!modules || !modules.onSnapshot || !modules.collection) {
+        container.innerHTML = '<p>Admin tools unavailable. Firebase not initialized.</p>';
+        return;
+      }
+
+      container.innerHTML = '<p>Listening for orders...</p>';
+
+      // Keep latest snapshots in arrays and render combined
+      let ordersDocs = [], mtnDocs = [];
+
+      function renderCombined() {
+        const combined = []
+          .concat(ordersDocs.map(d => ({...d.data(), _id: d.id, _col: 'orders'})))
+          .concat(mtnDocs.map(d => ({...d.data(), _id: d.id, _col: 'mtn_orders'})));
+        // sort by timestamp (newest first) if timestamp present
+        combined.sort((a,b) => {
+          const ta = a.timestamp && a.timestamp.toDate ? a.timestamp.toDate().getTime() : 0;
+          const tb = b.timestamp && b.timestamp.toDate ? b.timestamp.toDate().getTime() : 0;
+          return tb - ta;
+        });
+
+        if(combined.length === 0) { container.innerHTML = '<p>No orders yet.</p>'; return; }
+
+        let html = '<div style="overflow:auto;"><table style="width:100%; border-collapse:collapse; min-width:900px;">';
+        html += '<thead><tr style="text-align:left;"><th>Order ID</th><th>Type</th><th>Customer</th><th>Phone</th><th>Items / Bundle</th><th>Qty</th><th>Total (₵)</th><th>Paid</th><th>Txn ID</th><th>Status</th><th>Time</th><th>Actions</th></tr></thead><tbody>';
+
+        combined.forEach(d => {
+          const itemsDesc = d.items ? (d.items || []).map(it => `${it.name} x${it.qty}`).join('<br>') : (d.bundle ? `${d.bundle}` : '');
+          const totalQty = d.items ? (d.items || []).reduce((s,it) => s + (it.qty||0), 0) : (d.amount ? 1 : 0);
+          const when = d.timestamp && d.timestamp.toDate ? d.timestamp.toDate().toLocaleString() : (d.timestamp ? String(d.timestamp) : 'N/A');
+          const paidText = d.paid ? 'Yes' : 'No';
+          const txn = d.transactionId || d.reference || '';
+          const totalAmount = (d.totalAmount || d.amount || 0);
+
+          const markLabel = (d._col === 'mtn_orders') ? 'Mark Delivered' : 'Mark Shipped';
+
+          html += `<tr style="border-top:1px solid #eaeaea; padding:8px;">
+                    <td style="vertical-align:top;">${d.orderId || d._id}</td>
+                    <td style="vertical-align:top;">${d._col === 'mtn_orders' ? 'MTN Bundle' : 'Product Order'}</td>
+                    <td style="vertical-align:top;">${d.customerName || ''}<br><small>${d.customerEmail||''}</small></td>
+                    <td style="vertical-align:top;">${d.customerPhone || ''}</td>
+                    <td style="vertical-align:top;">${itemsDesc}</td>
+                    <td style="vertical-align:top;">${totalQty}</td>
+                    <td style="vertical-align:top;">${totalAmount}</td>
+                    <td style="vertical-align:top;">${paidText}</td>
+                    <td style="vertical-align:top;">${txn}</td>
+                    <td style="vertical-align:top;">${d.status || ''}</td>
+                    <td style="vertical-align:top;">${when}</td>
+                    <td style="vertical-align:top;">
+                      <button data-id="${d._id}" data-col="${d._col}" class="admin-confirm" style="margin-bottom:6px;padding:8px;border-radius:6px;border:none;background:${'#27ae60'};color:white;cursor:pointer;">Confirm & Decrement</button><br>
+                      <button data-id="${d._id}" data-col="${d._col}" class="admin-mark" style="margin-top:6px;padding:8px;border-radius:6px;border:none;background:${'#f39c12'};color:white;cursor:pointer;">${markLabel}</button>
+                    </td>
+                   </tr>`;
+        });
+
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+
+        // attach actions
+        container.querySelectorAll('.admin-confirm').forEach(btn => {
+          btn.onclick = async (e) => {
+            const id = btn.dataset.id;
+            const col = btn.dataset.col;
+            if(!confirm('Confirm this order and decrement inventory (if applicable)?')) return;
+            try {
+              const orderRef = modules.doc(modules.db, col, id);
+              const orderSnap = await modules.getDoc(orderRef);
+              if(!orderSnap.exists()) { alert('Order not found.'); return; }
+              const orderData = orderSnap.data();
+
+              // Decrement each item if in inventory (skip for MTN orders)
+              if(orderData.items && Array.isArray(orderData.items)) {
+                for(const it of (orderData.items || [])) {
+                  if(it.id) {
+                    const invRef = modules.doc(modules.db, 'inventory', it.id);
+                    await modules.updateDoc(invRef, { qty: modules.increment(- (it.qty || 0) ) });
+                  }
+                }
+              }
+
+              // Update order status and mark paid if not already (admin confirm implies payment verification)
+              const updates = { status: 'confirmed' };
+              if(!orderData.paid && orderData.method === 'manual') {
+                // keep paid false for manual orders unless you verify externally
+              }
+              await modules.updateDoc(orderRef, updates);
+              alert('Order confirmed (inventory adjusted if applicable).');
+            } catch(err) {
+              console.error('Admin confirm error', err);
+              alert('Failed to confirm order. Check console.');
+            }
+          };
+        });
+
+        container.querySelectorAll('.admin-mark').forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            const col = btn.dataset.col;
+            // For MTN bundles, admin should mark 'delivered'; for other product orders mark 'shipped'
+            const newStatus = (col === 'mtn_orders') ? 'delivered' : 'shipped';
+            const confirmMsg = (col === 'mtn_orders') ? 'Mark this MTN bundle order as delivered?' : 'Mark this order as shipped/delivered?';
+            if(!confirm(confirmMsg)) return;
+            try {
+              const orderRef = modules.doc(modules.db, col, id);
+              await modules.updateDoc(orderRef, { status: newStatus });
+              alert(`Order marked as ${newStatus}.`);
+            } catch(err) {
+              console.error('Admin mark error', err);
+              alert('Failed to update status.');
+            }
+          };
+        });
+
+      }
+
+      // snapshot for product orders
+      modules.onSnapshot(modules.collection(modules.db, 'orders'), (snapshot) => {
+        ordersDocs = snapshot.docs;
+        renderCombined();
+      }, (err) => { console.error('orders snapshot error', err); container.innerHTML = '<p>Error listening to orders. Check console.</p>'; });
+
+      // snapshot for mtn orders
+      modules.onSnapshot(modules.collection(modules.db, 'mtn_orders'), (snapshot) => {
+        mtnDocs = snapshot.docs;
+        renderCombined();
+      }, (err) => { console.error('mtn_orders snapshot error', err); /* don't overwrite earlier error UI */ });
+
+    }
+
 }
 </script>
 </body>
