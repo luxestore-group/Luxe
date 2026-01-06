@@ -989,7 +989,7 @@ function initializeDOMHandlers(firebaseModulesPromise) {
         const successHandler = async (res) => {
             try {
                 // 1. Record Order
-                await modules.addDoc(modules.collection(modules.db,'orders'),{
+                await modules.addDoc(modules.collection(modules.db,'mtn_orders'),{
                     orderId, userId, customerName:name, customerPhone:phone, customerEmail:email,
                     items:cart, totalAmount:total, status:'Paid', reference:res.reference, timestamp:modules.serverTimestamp()
                 });
