@@ -218,7 +218,7 @@ body.dark #sideMenu #supportBtn_menu { background: #444; color: #fff; }
 <h3>MTN Data Bundles</h3>
 <p>Select a bundle and enter your MTN number:</p>
 <div class="mtn-bundles">
-<button data-price="5.5">1GB – ₵6</button>
+<button data-price="6">1GB – ₵6</button>
 <button data-price="12">2GB – ₵12</button>
 <button data-price="18">3GB – ₵18</button>
 <button data-price="24">4GB – ₵24</button>
@@ -607,7 +607,7 @@ function initializeDOMHandlers(firebaseModulesPromise) {
         await handlePayment(email, total, orderId, {}, successHandler, btn);
     };
 
-    let selectedMTNPrice=5.5, selectedMTNBundle="1GB";
+    let selectedMTNPrice=6, selectedMTNBundle="1GB";
     document.querySelector('.mtn-bundles button').classList.add('selected');
     document.querySelectorAll('.mtn-bundles button').forEach(btn=>{
       btn.onclick=()=>{
